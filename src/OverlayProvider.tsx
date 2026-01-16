@@ -13,6 +13,9 @@ import { createOverlayStore } from "./store.js";
 export const OverlayContext = React.createContext<OverlayController | null>(
   null
 );
+export const OverlayItemsContext = React.createContext<OverlayItem[] | null>(
+  null
+);
 
 export type OverlayProviderProps = {
   children?: React.ReactNode;
@@ -102,7 +105,9 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
 
   return (
     <OverlayContext.Provider value={controller}>
-      {children}
+      <OverlayItemsContext.Provider value={items}>
+        {children}
+      </OverlayItemsContext.Provider>
     </OverlayContext.Provider>
   );
 };
