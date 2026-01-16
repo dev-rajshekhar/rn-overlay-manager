@@ -1,5 +1,5 @@
 import * as React from "react";
-import { View } from "react-native";
+import { BackHandler, View } from "react-native";
 import type { OverlayItem, OverlayRenderApi } from "./types.js";
 import { OverlayContext, OverlayItemsContext } from "./OverlayProvider.js";
 
@@ -18,6 +18,36 @@ export const OverlayHost = () => {
   }
 
   const orderedItems = React.useMemo(() => sortByPriority(items), [items]);
+
+  React.useEffect(() => {
+    if (orderedItems.length === 0) {
+      return;
+    }
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        for (let i = orderedItems.length - 1; i >= 0; i -= 1) {
+          const item = orderedItems[i];
+
+          if (item.onBackPress && item.onBackPress()) {
+            return true;
+          }
+
+          if (item.dismissible) {
+            controller.hide(item.id);
+            return true;
+          }
+        }
+
+        return false;
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [controller, orderedItems]);
 
   return (
     <>
