@@ -17,3 +17,7 @@ import { OverlayManager } from "rn-overlay-manager";
 
 // TODO: add usage example.
 ```
+
+## License
+
+MIT. See `LICENSE`.
