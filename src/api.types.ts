@@ -5,7 +5,7 @@ import type {
   OverlayShowOptions,
   ToastOptions,
   TooltipOptions
-} from "./overlay.types";
+} from "./overlay.types.js";
 
 export interface OverlayController {
   show(options: OverlayShowOptions): OverlayId;
