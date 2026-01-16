@@ -10,3 +10,6 @@ export type {
   ModalOptions,
   OverlayController
 } from "./types.js";
+
+export { OverlayProvider } from "./OverlayProvider.js";
+export { useOverlay } from "./useOverlay.js";
