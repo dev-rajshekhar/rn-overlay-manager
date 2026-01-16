@@ -1,16 +1,38 @@
 {
   "name": "rn-overlay-manager",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "Overlay manager for React Native.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit"
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run clean && npm run build && npm run typecheck"
   },
-  "keywords": [],
+  "keywords": [
+    "react-native",
+    "overlay",
+    "modal",
+    "portal",
+    "ui"
+  ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/react": "^19.2.8",
     "typescript": "^5.9.3"
@@ -18,5 +40,10 @@
   "peerDependencies": {
     "react": ">=17",
     "react-native": ">=0.70"
+  },
+  "peerDependenciesMeta": {
+    "react-native-safe-area-context": {
+      "optional": true
+    }
   }
 }
