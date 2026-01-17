@@ -111,6 +111,17 @@ export type ModalOptions = {
   render: (api: OverlayRenderApi) => React.ReactNode;
 };
 
+/** Convenience loader options */
+export type LoaderOptions = {
+  message?: string;
+  render?: (api: OverlayRenderApi) => React.ReactNode;
+  styles?: {
+    container?: StyleProp<ViewStyle>;
+    text?: StyleProp<TextStyle>;
+    spinner?: StyleProp<ViewStyle>;
+  };
+};
+
 /** Public overlay controller API */
 export interface OverlayController {
   show<P = unknown>(options: OverlayShowOptions<P>): string;
@@ -121,4 +132,5 @@ export interface OverlayController {
   toast(options: ToastOptions): string;
   tooltip(options: TooltipOptions): string;
   modal(options: ModalOptions): string;
+  loader(options?: LoaderOptions): string;
 }
