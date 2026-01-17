@@ -332,6 +332,20 @@ const TestScreen = () => {
     });
   };
 
+  const showToastBottom = () => {
+    overlay.toast({ message: "Bottom toast", placement: "bottom" });
+  };
+
+  const showToastTop = () => {
+    overlay.toast({ message: "Top toast", placement: "top" });
+  };
+
+  const queueToasts = () => {
+    overlay.toast({ message: "Queued toast 1", placement: "bottom" });
+    overlay.toast({ message: "Queued toast 2", placement: "bottom" });
+    overlay.toast({ message: "Queued toast 3", placement: "bottom" });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>rn-overlay-manager example</Text>
@@ -341,6 +355,21 @@ const TestScreen = () => {
           label="Show built-in modal"
           helper="Dim backdrop, dismissible, shows inset/debug details."
           onPress={showBuiltInModal}
+        />
+        <ActionButton
+          label="Show toast (bottom)"
+          helper="Non-blocking toast aligned to bottom safe area."
+          onPress={showToastBottom}
+        />
+        <ActionButton
+          label="Show toast (top)"
+          helper="Non-blocking toast aligned to top safe area."
+          onPress={showToastTop}
+        />
+        <ActionButton
+          label="Queue 3 toasts"
+          helper="Toasts should appear one after another."
+          onPress={queueToasts}
         />
       </View>
       <View style={styles.section}>

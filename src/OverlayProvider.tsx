@@ -10,6 +10,7 @@ import type {
 } from "./types.js";
 import { createOverlayStore } from "./store.js";
 import { ModalOverlay } from "./overlays/ModalOverlay.js";
+import { ToastOverlay } from "./overlays/ToastOverlay.js";
 
 export const OverlayContext = React.createContext<OverlayController | null>(
   null
@@ -46,6 +47,9 @@ const createHelperShowOptions = <P,>(
 export const OverlayProvider = ({ children }: OverlayProviderProps) => {
   const [items, setItems] = React.useState<OverlayItem[]>([]);
   const store = React.useMemo(() => createOverlayStore(setItems), [setItems]);
+  const toastQueueRef = React.useRef<(ToastOptions & { id: string })[]>([]);
+  const activeToastIdRef = React.useRef<string | null>(null);
+  const toastIdRef = React.useRef(0);
 
   const show = React.useCallback(
     <P,>(options: OverlayShowOptions<P>) => store.show(options),
@@ -59,16 +63,71 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
     [store]
   );
 
-  const toast = React.useCallback(
-    (options: ToastOptions) => {
-      const showOptions = createHelperShowOptions(
-        "toast",
-        options,
-        (_api, _props) => null
-      );
-      return store.show(showOptions);
+  const showToastNow = React.useCallback(
+    (options: ToastOptions & { id: string }) => {
+      const placement = options.placement ?? "bottom";
+      const durationMs = options.durationMs ?? 2000;
+      activeToastIdRef.current = options.id;
+      return store.show({
+        id: options.id,
+        type: "toast",
+        props: options,
+        render: (_api) => (
+          <ToastOverlay
+            message={options.message}
+            placement={placement}
+            durationMs={durationMs}
+            onTimeout={() => store.hide(options.id)}
+          />
+        ),
+        priority: 50,
+        dismissible: false,
+        blockTouches: false,
+        backdrop: "none",
+        placement,
+        insets: "safeArea"
+      });
     },
     [store]
+  );
+
+  const showNextToast = React.useCallback(() => {
+    const next = toastQueueRef.current.shift();
+    if (next) {
+      showToastNow(next);
+    }
+  }, [showToastNow]);
+
+  React.useEffect(() => {
+    const activeId = activeToastIdRef.current;
+    if (!activeId) {
+      return;
+    }
+    const isActive = items.some((item) => item.id === activeId);
+    if (!isActive) {
+      activeToastIdRef.current = null;
+      showNextToast();
+    }
+  }, [items, showNextToast]);
+
+  const toast = React.useCallback(
+    (options: ToastOptions) => {
+      toastIdRef.current += 1;
+      const id = `toast_${Date.now()}_${toastIdRef.current}`;
+      const entry = { ...options, id };
+      const queue = options.queue ?? true;
+
+      if (activeToastIdRef.current) {
+        if (queue) {
+          toastQueueRef.current.push(entry);
+          return id;
+        }
+        store.hide(activeToastIdRef.current);
+      }
+
+      return showToastNow(entry);
+    },
+    [showToastNow, store]
   );
 
   const tooltip = React.useCallback(
