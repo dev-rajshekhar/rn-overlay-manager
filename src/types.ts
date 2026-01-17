@@ -101,6 +101,7 @@ export type TooltipOptions = {
 export type ModalOptions = {
   dismissible?: boolean;
   backdrop?: "transparent" | "dim";
+  insets?: InsetsMode;
   render: (api: OverlayRenderApi) => React.ReactNode;
 };
 

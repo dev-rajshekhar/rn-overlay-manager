@@ -6,9 +6,10 @@ import type {
   OverlayShowOptions,
   OverlayType,
   ToastOptions,
-  TooltipOptions,
+  TooltipOptions
 } from "./types.js";
 import { createOverlayStore } from "./store.js";
+import { ModalOverlay } from "./overlays/ModalOverlay.js";
 
 export const OverlayContext = React.createContext<OverlayController | null>(
   null
@@ -84,16 +85,24 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
 
   const modal = React.useCallback(
     (options: ModalOptions) => {
-      const showOptions = createHelperShowOptions(
-        "modal",
-        options,
-        (api, _props) => options.render(api),
-        {
-          dismissible: options.dismissible,
-          backdrop: options.backdrop,
-        }
-      );
-      return store.show(showOptions);
+      const dismissible = options.dismissible ?? true;
+      const backdrop = options.backdrop ?? "dim";
+      const insets = options.insets ?? "safeArea";
+
+      return store.show({
+        type: "modal",
+        props: options,
+        render: (api) => (
+          <ModalOverlay api={api} dismissible={dismissible} backdrop={backdrop}>
+            {options.render(api)}
+          </ModalOverlay>
+        ),
+        priority: 90,
+        dismissible,
+        blockTouches: true,
+        backdrop,
+        insets
+      });
     },
     [store]
   );

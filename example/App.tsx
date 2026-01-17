@@ -202,6 +202,24 @@ const TestScreen = () => {
     });
   };
 
+  const showBuiltInModal = () => {
+    overlay.modal({
+      dismissible: true,
+      backdrop: "dim",
+      render: (api) => (
+        <View style={styles.modalContentContainer}>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Built-in modal</Text>
+            <Text style={styles.insetsText}>{getInsetsText(api)}</Text>
+            <Pressable style={styles.button} onPress={api.hide}>
+              <Text style={styles.buttonText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      ),
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>rn-overlay-manager example</Text>
@@ -225,6 +243,9 @@ const TestScreen = () => {
       </Pressable>
       <Pressable style={styles.button} onPress={showAllowsTouches}>
         <Text style={styles.buttonText}>Overlay allows touches</Text>
+      </Pressable>
+      <Pressable style={styles.button} onPress={showBuiltInModal}>
+        <Text style={styles.buttonText}>Show built-in modal</Text>
       </Pressable>
       <Pressable style={styles.button} onPress={showTwoOverlays}>
         <Text style={styles.buttonText}>Show two overlays (priority)</Text>
@@ -299,6 +320,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  modalContentContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 16,
   },
