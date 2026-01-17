@@ -95,10 +95,16 @@ export type ToastOptions = {
 };
 
 /** Convenience tooltip options */
+export type TooltipAnchorRef = React.RefObject<{
+  measureInWindow?: (
+    callback: (x: number, y: number, width: number, height: number) => void
+  ) => void;
+} | null>;
+
 export type TooltipOptions = {
-  anchorRef: React.RefObject<View>;
+  anchorRef: TooltipAnchorRef;
   text?: string;
-  placement?: "top" | "bottom" | "auto";
+  placement?: "top" | "bottom" | "left" | "right" | "auto";
   type?: "info" | "success" | "warning" | "error";
   /** close on outside press */
   dismissible?: boolean;

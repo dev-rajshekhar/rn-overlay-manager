@@ -6,6 +6,7 @@ import {
   OverlayProvider,
   useOverlay,
   type OverlayRenderApi,
+  type TooltipAnchorRef,
 } from "rn-overlay-manager";
 
 type OverlayRenderProps = {
@@ -43,7 +44,9 @@ const OverlayDebugCard = ({ info }: { info: OverlayDebugInfo }) => {
         Block touches: {info.blockTouches ? "true" : "false"}
       </Text>
       <Text style={styles.debugText}>Priority: {info.priority}</Text>
-      <Text style={styles.debugText}>Insets mode: {info.insets ?? "default"}</Text>
+      <Text style={styles.debugText}>
+        Insets mode: {info.insets ?? "default"}
+      </Text>
     </View>
   );
 };
@@ -61,9 +64,9 @@ const ActionButton = ({ label, helper, onPress }: ActionButtonProps) => {
 
 const TestScreen = () => {
   const overlay = useOverlay();
-  const centerAnchorRef = React.useRef<View>(null);
-  const topRightAnchorRef = React.useRef<View>(null);
-  const bottomLeftAnchorRef = React.useRef<View>(null);
+  const centerAnchorRef = React.useRef<View | null>(null);
+  const topRightAnchorRef = React.useRef<View | null>(null);
+  const bottomLeftAnchorRef = React.useRef<View | null>(null);
 
   const getInsetsText = (api: OverlayRenderApi) => {
     const insets = api.insets ?? { top: 0, bottom: 0, left: 0, right: 0 };
@@ -309,7 +312,8 @@ const TestScreen = () => {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Built-in modal</Text>
             <Text style={styles.modalDescription}>
-              This uses overlay.modal() with a dim backdrop and safe-area padding.
+              This uses overlay.modal() with a dim backdrop and safe-area
+              padding.
             </Text>
             <OverlayDebugCard
               info={{
@@ -355,7 +359,7 @@ const TestScreen = () => {
       placement: "bottom",
       backgroundColor: "#2563EB",
       textStyle: { fontWeight: "700" },
-      toastStyle: { borderRadius: 12 }
+      toastStyle: { borderRadius: 12 },
     });
   };
 
@@ -368,7 +372,7 @@ const TestScreen = () => {
           <Text style={styles.customToastTitle}>Custom toast</Text>
           <Text style={styles.customToastBody}>Fully custom render.</Text>
         </View>
-      )
+      ),
     });
   };
 
@@ -388,33 +392,51 @@ const TestScreen = () => {
             </Text>
           </View>
         </View>
-      )
+      ),
     });
     setTimeout(() => overlay.hide(id), 2000);
   };
 
   const showTooltipAuto = () => {
     overlay.tooltip({
-      anchorRef: centerAnchorRef,
+      anchorRef: centerAnchorRef as unknown as TooltipAnchorRef,
       text: "Auto placement tooltip.",
       placement: "auto",
-      type: "info",
-      autoDismissMs: 2500
+      type: "success",
+      autoDismissMs: 2500,
     });
   };
 
   const showTooltipTop = () => {
     overlay.tooltip({
-      anchorRef: bottomLeftAnchorRef,
+      anchorRef: bottomLeftAnchorRef as unknown as TooltipAnchorRef,
       text: "Pinned above the anchor.",
       placement: "top",
-      type: "warning"
+      type: "warning",
+    });
+  };
+
+  const showTooltipLeft = () => {
+    overlay.tooltip({
+      anchorRef: centerAnchorRef as unknown as TooltipAnchorRef,
+      text: "Left placement tooltip.",
+      placement: "left",
+      type: "info",
+    });
+  };
+
+  const showTooltipRight = () => {
+    overlay.tooltip({
+      anchorRef: centerAnchorRef as unknown as TooltipAnchorRef,
+      text: "Right placement tooltip.",
+      placement: "right",
+      type: "info",
     });
   };
 
   const showTooltipCustom = () => {
     overlay.tooltip({
-      anchorRef: topRightAnchorRef,
+      anchorRef: topRightAnchorRef as unknown as TooltipAnchorRef,
       placement: "bottom",
       type: "success",
       render: (api) => (
@@ -427,13 +449,16 @@ const TestScreen = () => {
             <Text style={styles.customTooltipButtonText}>Got it</Text>
           </Pressable>
         </View>
-      )
+      ),
     });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>rn-overlay-manager example</Text>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Built-in APIs</Text>
@@ -555,6 +580,16 @@ const TestScreen = () => {
             onPress={showTooltipTop}
           />
           <ActionButton
+            label="Show tooltip (left)"
+            helper="Forced left placement."
+            onPress={showTooltipLeft}
+          />
+          <ActionButton
+            label="Show tooltip (right)"
+            helper="Forced right placement."
+            onPress={showTooltipRight}
+          />
+          <ActionButton
             label="Show tooltip (custom render)"
             helper="Uses tooltip.render for custom UI."
             onPress={showTooltipCustom}
@@ -584,13 +619,13 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#FFFFFF",
   },
   scrollContent: {
     alignItems: "center",
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 40
+    paddingBottom: 40,
   },
   title: {
     fontSize: 18,

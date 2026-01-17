@@ -19,7 +19,9 @@ type AnchorLayout = LayoutRectangle;
 type Size = { width: number; height: number };
 
 const SCREEN_MARGIN = 8;
-const TOOLTIP_GAP = 8;
+const TOOLTIP_GAP = 0;
+const ARROW_SIZE = 8;
+const ARROW_DEPTH = 8;
 
 const TYPE_COLORS: Record<NonNullable<TooltipOptions["type"]>, string> = {
   info: "#111827",
@@ -51,7 +53,7 @@ export const TooltipOverlay = ({ api, options }: TooltipOverlayProps) => {
     if (!node || typeof node.measureInWindow !== "function") {
       return;
     }
-    node.measureInWindow((x, y, width, height) => {
+    node.measureInWindow((x: number, y: number, width: number, height: number) => {
       if (Number.isFinite(x) && Number.isFinite(y)) {
         setAnchorLayout({ x, y, width, height });
       }
@@ -93,29 +95,116 @@ export const TooltipOverlay = ({ api, options }: TooltipOverlayProps) => {
         ? "bottom"
         : placement;
 
+  const anchorCenterX = anchorLayout.x + anchorLayout.width / 2;
+  const anchorCenterY = anchorLayout.y + anchorLayout.height / 2;
+
   const left =
     tooltipSize
-      ? clamp(
-          anchorLayout.x + anchorLayout.width / 2 - tooltipSize.width / 2,
-          leftBound,
-          rightBound - tooltipSize.width
-        )
+      ? resolvedPlacement === "left"
+        ? clamp(
+            anchorLayout.x -
+              tooltipSize.width -
+              TOOLTIP_GAP -
+              ARROW_DEPTH,
+            leftBound,
+            rightBound - tooltipSize.width
+          )
+        : resolvedPlacement === "right"
+          ? clamp(
+              anchorLayout.x +
+                anchorLayout.width +
+                TOOLTIP_GAP +
+                ARROW_DEPTH,
+              leftBound,
+              rightBound - tooltipSize.width
+            )
+          : clamp(
+              anchorCenterX - tooltipSize.width / 2,
+              leftBound,
+              rightBound - tooltipSize.width
+            )
       : leftBound;
 
   const top =
     tooltipSize
-      ? clamp(
-          resolvedPlacement === "bottom"
-            ? anchorLayout.y + anchorLayout.height + TOOLTIP_GAP
-            : anchorLayout.y - tooltipSize.height - TOOLTIP_GAP,
-          topBound,
-          bottomBound - tooltipSize.height
-        )
+      ? resolvedPlacement === "left" || resolvedPlacement === "right"
+        ? clamp(
+            anchorCenterY - tooltipSize.height / 2,
+            topBound,
+            bottomBound - tooltipSize.height
+          )
+        : clamp(
+            resolvedPlacement === "bottom"
+              ? anchorLayout.y +
+                  anchorLayout.height +
+                  TOOLTIP_GAP +
+                  ARROW_DEPTH
+              : anchorLayout.y -
+                  tooltipSize.height -
+                  TOOLTIP_GAP -
+                  ARROW_DEPTH,
+            topBound,
+            bottomBound - tooltipSize.height
+          )
       : topBound;
+
+  const arrowLeft =
+    resolvedPlacement === "left"
+      ? left + (tooltipSize?.width ?? 0)
+      : resolvedPlacement === "right"
+        ? left - ARROW_DEPTH
+        : clamp(
+            anchorCenterX - ARROW_SIZE,
+            left + ARROW_SIZE,
+            left + (tooltipSize?.width ?? 0) - ARROW_SIZE * 2
+          );
+
+  const arrowTop =
+    resolvedPlacement === "left" || resolvedPlacement === "right"
+      ? clamp(
+          anchorCenterY - ARROW_SIZE,
+          top + ARROW_SIZE,
+          top + (tooltipSize?.height ?? 0) - ARROW_SIZE * 2
+        )
+      : resolvedPlacement === "top"
+        ? top + (tooltipSize?.height ?? 0)
+        : top - ARROW_DEPTH;
 
   const backgroundColor = TYPE_COLORS[type];
   const content = options.render ? options.render(api, options) : null;
   const showDefault = !options.render && Boolean(message);
+  const arrowStyle =
+    resolvedPlacement === "left"
+      ? {
+          borderLeftColor: backgroundColor,
+          borderTopWidth: ARROW_SIZE,
+          borderBottomWidth: ARROW_SIZE,
+          borderLeftWidth: ARROW_DEPTH,
+          borderRightWidth: 0
+        }
+      : resolvedPlacement === "right"
+        ? {
+            borderRightColor: backgroundColor,
+            borderTopWidth: ARROW_SIZE,
+            borderBottomWidth: ARROW_SIZE,
+            borderRightWidth: ARROW_DEPTH,
+            borderLeftWidth: 0
+          }
+        : resolvedPlacement === "top"
+          ? {
+              borderTopColor: backgroundColor,
+              borderLeftWidth: ARROW_SIZE,
+              borderRightWidth: ARROW_SIZE,
+              borderTopWidth: ARROW_DEPTH,
+              borderBottomWidth: 0
+            }
+          : {
+              borderBottomColor: backgroundColor,
+              borderLeftWidth: ARROW_SIZE,
+              borderRightWidth: ARROW_SIZE,
+              borderBottomWidth: ARROW_DEPTH,
+              borderTopWidth: 0
+            };
 
   return (
     <View style={styles.root} pointerEvents="box-none">
@@ -150,6 +239,18 @@ export const TooltipOverlay = ({ api, options }: TooltipOverlayProps) => {
           content
         )}
       </View>
+      <View
+        pointerEvents="none"
+        style={[
+          styles.arrow,
+          {
+            left: arrowLeft,
+            top: arrowTop,
+            opacity: tooltipSize ? 1 : 0
+          },
+          arrowStyle
+        ]}
+      />
     </View>
   );
 };
@@ -172,5 +273,18 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "600"
+  },
+  arrow: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: ARROW_SIZE,
+    borderRightWidth: ARROW_SIZE,
+    borderTopWidth: ARROW_SIZE,
+    borderBottomWidth: ARROW_SIZE,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "transparent",
+    borderBottomColor: "transparent"
   }
 });
