@@ -1,5 +1,6 @@
 import * as React from "react";
 import type {
+  LoaderOptions,
   ModalOptions,
   OverlayController,
   OverlayItem,
@@ -10,6 +11,7 @@ import type {
 } from "./types.js";
 import { createOverlayStore } from "./store.js";
 import { ModalOverlay } from "./overlays/ModalOverlay.js";
+import { LoaderOverlay } from "./overlays/LoaderOverlay.js";
 import { ToastOverlay } from "./overlays/ToastOverlay.js";
 
 export const OverlayContext = React.createContext<OverlayController | null>(
@@ -171,9 +173,30 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
     [store]
   );
 
+  const loader = React.useCallback(
+    (options?: LoaderOptions) => {
+      return store.show({
+        type: "loader",
+        props: options,
+        render: (api) =>
+          options?.render ? (
+            options.render(api)
+          ) : (
+            <LoaderOverlay message={options?.message} styles={options?.styles} />
+          ),
+        priority: 100,
+        dismissible: false,
+        blockTouches: true,
+        backdrop: "dim",
+        insets: "none"
+      });
+    },
+    [store]
+  );
+
   const controller = React.useMemo<OverlayController>(
-    () => ({ show, hide, hideAll, toast, tooltip, modal }),
-    [show, hide, hideAll, toast, tooltip, modal]
+    () => ({ show, hide, hideAll, toast, tooltip, modal, loader }),
+    [show, hide, hideAll, toast, tooltip, modal, loader]
   );
 
   return (

@@ -9,6 +9,7 @@ export type {
   ToastOptions,
   TooltipOptions,
   ModalOptions,
+  LoaderOptions,
   OverlayController
 } from "./types.js";
 

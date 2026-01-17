@@ -369,6 +369,27 @@ const TestScreen = () => {
     });
   };
 
+  const showLoader = () => {
+    const id = overlay.loader({ message: "Loading for 2s..." });
+    setTimeout(() => overlay.hide(id), 2000);
+  };
+
+  const showCustomLoader = () => {
+    const id = overlay.loader({
+      render: () => (
+        <View style={styles.customLoaderContainer}>
+          <View style={styles.customLoader}>
+            <Text style={styles.customLoaderTitle}>Custom loader</Text>
+            <Text style={styles.customLoaderBody}>
+              Waiting on something important.
+            </Text>
+          </View>
+        </View>
+      )
+    });
+    setTimeout(() => overlay.hide(id), 2000);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -400,12 +421,22 @@ const TestScreen = () => {
             helper="Uses toastStyle/textStyle/backgroundColor options."
             onPress={showStyledToast}
           />
-          <ActionButton
-            label="Show custom toast"
-            helper="Uses toast.render for full UI control."
-            onPress={showCustomToast}
-          />
-        </View>
+        <ActionButton
+          label="Show custom toast"
+          helper="Uses toast.render for full UI control."
+          onPress={showCustomToast}
+        />
+        <ActionButton
+          label="Show loader (2s)"
+          helper="Blocks touches with dim backdrop, auto-hides."
+          onPress={showLoader}
+        />
+        <ActionButton
+          label="Show custom loader"
+          helper="Uses loader.render to customize UI."
+          onPress={showCustomLoader}
+        />
+      </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Custom overlays</Text>
           <ActionButton
@@ -637,6 +668,33 @@ const styles = StyleSheet.create({
   customToastBody: {
     color: "#D1D5DB",
     fontSize: 12,
+  },
+  customLoader: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    gap: 6,
+    shadowColor: "#111827",
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+  },
+  customLoaderTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  customLoaderBody: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  customLoaderContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
   },
   insetsText: {
     fontSize: 12,
