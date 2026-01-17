@@ -55,9 +55,6 @@ export const createOverlayStore = (setItems: SetItems): OverlayStore => {
       if (!target) {
         return prev;
       }
-      if (target.dismissible === false) {
-        return prev;
-      }
       return prev.filter((item) => item.id !== id);
     });
   };
@@ -66,9 +63,6 @@ export const createOverlayStore = (setItems: SetItems): OverlayStore => {
     setItems((prev) => {
       return prev.filter((item) => {
         if (type && item.type !== type) {
-          return true;
-        }
-        if (item.dismissible === false) {
           return true;
         }
         return false;

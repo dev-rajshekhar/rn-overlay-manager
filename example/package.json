@@ -1,0 +1,19 @@
+{
+  "name": "rn-overlay-manager-example",
+  "version": "0.0.1",
+  "private": true,
+  "main": "expo/AppEntry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~54.0.30",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "rn-overlay-manager": "file:.."
+  }
+}

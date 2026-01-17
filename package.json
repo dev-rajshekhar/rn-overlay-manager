@@ -5,12 +5,15 @@
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
+  "react-native": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "react-native": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -20,7 +23,7 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.build.cjs.json && node ./scripts/create-cjs-entry.cjs",
     "typecheck": "tsc --noEmit",
     "prepack": "npm run clean && npm run build && npm run typecheck"
   },
