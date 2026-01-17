@@ -95,12 +95,25 @@ export type ToastOptions = {
 };
 
 /** Convenience tooltip options */
+export type TooltipAnchorRef = React.RefObject<{
+  measureInWindow?: (
+    callback: (x: number, y: number, width: number, height: number) => void
+  ) => void;
+} | null>;
+
 export type TooltipOptions = {
-  anchorRef: React.RefObject<View>;
-  text: string;
-  placement?: "top" | "bottom";
+  anchorRef: TooltipAnchorRef;
+  text?: string;
+  placement?: "top" | "bottom" | "left" | "right" | "auto";
+  type?: "info" | "success" | "warning" | "error";
   /** close on outside press */
   dismissible?: boolean;
+  autoDismissMs?: number;
+  styles?: {
+    container?: StyleProp<ViewStyle>;
+    text?: StyleProp<TextStyle>;
+  };
+  render?: (api: OverlayRenderApi, data: TooltipOptions) => React.ReactNode;
 };
 
 /** Convenience modal options */
