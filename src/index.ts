@@ -2,6 +2,7 @@ export type {
   OverlayType,
   OverlayPlacement,
   InsetsMode,
+  Insets,
   OverlayRenderApi,
   OverlayItem,
   OverlayShowOptions,

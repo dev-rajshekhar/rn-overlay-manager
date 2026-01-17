@@ -17,12 +17,21 @@ export type InsetsMode =
   | "safeArea+tabBar"
   | { top?: number; bottom?: number; left?: number; right?: number };
 
+export type Insets = {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+};
+
 /** What the overlay render function receives */
 export type OverlayRenderApi = {
   /** Hide this overlay */
   hide: () => void;
   /** Overlay id */
   id: string;
+  /** Safe-area insets (or fallback zeros) */
+  insets?: Insets;
 };
 
 /** A single overlay instance in the stack */
