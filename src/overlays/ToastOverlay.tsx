@@ -1,4 +1,5 @@
 import * as React from "react";
+import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { StyleSheet, Text, View } from "react-native";
 
 type ToastOverlayProps = {
@@ -6,13 +7,21 @@ type ToastOverlayProps = {
   placement: "top" | "bottom";
   durationMs: number;
   onTimeout: () => void;
+  toastStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  backgroundColor?: string;
+  children?: React.ReactNode;
 };
 
 export const ToastOverlay = ({
   message,
   placement,
   durationMs,
-  onTimeout
+  onTimeout,
+  toastStyle,
+  textStyle,
+  backgroundColor,
+  children
 }: ToastOverlayProps) => {
   React.useEffect(() => {
     const timeout = setTimeout(onTimeout, durationMs);
@@ -27,9 +36,19 @@ export const ToastOverlay = ({
         placement === "top" ? styles.alignTop : styles.alignBottom
       ]}
     >
-      <View style={styles.toast}>
-        <Text style={styles.toastText}>{message}</Text>
-      </View>
+      {children ? (
+        children
+      ) : (
+        <View
+          style={[
+            styles.toast,
+            backgroundColor ? { backgroundColor } : null,
+            toastStyle
+          ]}
+        >
+          <Text style={[styles.toastText, textStyle]}>{message}</Text>
+        </View>
+      )}
     </View>
   );
 };

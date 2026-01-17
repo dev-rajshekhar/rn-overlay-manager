@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
   OverlayHost,
@@ -346,73 +346,108 @@ const TestScreen = () => {
     overlay.toast({ message: "Queued toast 3", placement: "bottom" });
   };
 
+  const showStyledToast = () => {
+    overlay.toast({
+      message: "Styled toast",
+      placement: "bottom",
+      backgroundColor: "#2563EB",
+      textStyle: { fontWeight: "700" },
+      toastStyle: { borderRadius: 12 }
+    });
+  };
+
+  const showCustomToast = () => {
+    overlay.toast({
+      message: "Custom toast",
+      placement: "top",
+      render: () => (
+        <View style={styles.customToast}>
+          <Text style={styles.customToastTitle}>Custom toast</Text>
+          <Text style={styles.customToastBody}>Fully custom render.</Text>
+        </View>
+      )
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>rn-overlay-manager example</Text>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Built-in APIs</Text>
-        <ActionButton
-          label="Show built-in modal"
-          helper="Dim backdrop, dismissible, shows inset/debug details."
-          onPress={showBuiltInModal}
-        />
-        <ActionButton
-          label="Show toast (bottom)"
-          helper="Non-blocking toast aligned to bottom safe area."
-          onPress={showToastBottom}
-        />
-        <ActionButton
-          label="Show toast (top)"
-          helper="Non-blocking toast aligned to top safe area."
-          onPress={showToastTop}
-        />
-        <ActionButton
-          label="Queue 3 toasts"
-          helper="Toasts should appear one after another."
-          onPress={queueToasts}
-        />
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Custom overlays</Text>
-        <ActionButton
-          label="Custom dismissible overlay"
-          helper="Tap outside to dismiss."
-          onPress={showDismissible}
-        />
-        <ActionButton
-          label="Custom non-dismissible overlay"
-          helper="Backdrop tap should NOT dismiss."
-          onPress={showNonDismissible}
-        />
-        <ActionButton
-          label="Bottom overlay (safe area)"
-          helper="Bottom-aligned with safe-area padding."
-          onPress={showBottomSafeArea}
-        />
-        <ActionButton
-          label="Top overlay (safe area)"
-          helper="Top-aligned below Dynamic Island/notch."
-          onPress={showTopSafeArea}
-        />
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Behavior tests</Text>
-        <ActionButton
-          label="Priority demo (two overlays)"
-          helper="High priority should appear above low priority."
-          onPress={showTwoOverlays}
-        />
-        <ActionButton
-          label="Overlay blocks touches"
-          helper="Underlying UI should NOT be clickable."
-          onPress={showBlocksTouches}
-        />
-        <ActionButton
-          label="Overlay allows touches"
-          helper="Underlying UI should remain clickable."
-          onPress={showAllowsTouches}
-        />
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>rn-overlay-manager example</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Built-in APIs</Text>
+          <ActionButton
+            label="Show built-in modal"
+            helper="Dim backdrop, dismissible, shows inset/debug details."
+            onPress={showBuiltInModal}
+          />
+          <ActionButton
+            label="Show toast (bottom)"
+            helper="Non-blocking toast aligned to bottom safe area."
+            onPress={showToastBottom}
+          />
+          <ActionButton
+            label="Show toast (top)"
+            helper="Non-blocking toast aligned to top safe area."
+            onPress={showToastTop}
+          />
+          <ActionButton
+            label="Queue 3 toasts"
+            helper="Toasts should appear one after another."
+            onPress={queueToasts}
+          />
+          <ActionButton
+            label="Show styled toast"
+            helper="Uses toastStyle/textStyle/backgroundColor options."
+            onPress={showStyledToast}
+          />
+          <ActionButton
+            label="Show custom toast"
+            helper="Uses toast.render for full UI control."
+            onPress={showCustomToast}
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Custom overlays</Text>
+          <ActionButton
+            label="Custom dismissible overlay"
+            helper="Tap outside to dismiss."
+            onPress={showDismissible}
+          />
+          <ActionButton
+            label="Custom non-dismissible overlay"
+            helper="Backdrop tap should NOT dismiss."
+            onPress={showNonDismissible}
+          />
+          <ActionButton
+            label="Bottom overlay (safe area)"
+            helper="Bottom-aligned with safe-area padding."
+            onPress={showBottomSafeArea}
+          />
+          <ActionButton
+            label="Top overlay (safe area)"
+            helper="Top-aligned below Dynamic Island/notch."
+            onPress={showTopSafeArea}
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Behavior tests</Text>
+          <ActionButton
+            label="Priority demo (two overlays)"
+            helper="High priority should appear above low priority."
+            onPress={showTwoOverlays}
+          />
+          <ActionButton
+            label="Overlay blocks touches"
+            helper="Underlying UI should NOT be clickable."
+            onPress={showBlocksTouches}
+          />
+          <ActionButton
+            label="Overlay allows touches"
+            helper="Underlying UI should remain clickable."
+            onPress={showAllowsTouches}
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -436,11 +471,13 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF"
+  },
+  scrollContent: {
     alignItems: "center",
-    justifyContent: "flex-start",
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 32,
+    paddingBottom: 40
   },
   title: {
     fontSize: 18,
@@ -583,6 +620,23 @@ const styles = StyleSheet.create({
   debugText: {
     fontSize: 12,
     color: "#374151",
+  },
+  customToast: {
+    backgroundColor: "#111827",
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    gap: 4,
+  },
+  customToastTitle: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  customToastBody: {
+    color: "#D1D5DB",
+    fontSize: 12,
   },
   insetsText: {
     fontSize: 12,

@@ -1,5 +1,5 @@
 import type * as React from "react";
-import type { View } from "react-native";
+import type { StyleProp, TextStyle, View, ViewStyle } from "react-native";
 
 /**
  * Built-in overlay types shipped by this library.
@@ -86,6 +86,12 @@ export type ToastOptions = {
   placement?: "top" | "bottom";
   /** if true, enqueue when another toast is visible */
   queue?: boolean;
+  /** Custom toast renderer (overrides built-in UI) */
+  render?: (api: OverlayRenderApi, options: ToastOptions) => React.ReactNode;
+  /** Style overrides for built-in toast UI */
+  toastStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  backgroundColor?: string;
 };
 
 /** Convenience tooltip options */

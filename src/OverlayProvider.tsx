@@ -72,13 +72,18 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
         id: options.id,
         type: "toast",
         props: options,
-        render: (_api) => (
+        render: (api) => (
           <ToastOverlay
             message={options.message}
             placement={placement}
             durationMs={durationMs}
             onTimeout={() => store.hide(options.id)}
-          />
+            toastStyle={options.toastStyle}
+            textStyle={options.textStyle}
+            backgroundColor={options.backgroundColor}
+          >
+            {options.render ? options.render(api, options) : null}
+          </ToastOverlay>
         ),
         priority: 50,
         dismissible: false,
