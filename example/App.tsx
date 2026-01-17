@@ -61,6 +61,9 @@ const ActionButton = ({ label, helper, onPress }: ActionButtonProps) => {
 
 const TestScreen = () => {
   const overlay = useOverlay();
+  const centerAnchorRef = React.useRef<View>(null);
+  const topRightAnchorRef = React.useRef<View>(null);
+  const bottomLeftAnchorRef = React.useRef<View>(null);
 
   const getInsetsText = (api: OverlayRenderApi) => {
     const insets = api.insets ?? { top: 0, bottom: 0, left: 0, right: 0 };
@@ -390,6 +393,44 @@ const TestScreen = () => {
     setTimeout(() => overlay.hide(id), 2000);
   };
 
+  const showTooltipAuto = () => {
+    overlay.tooltip({
+      anchorRef: centerAnchorRef,
+      text: "Auto placement tooltip.",
+      placement: "auto",
+      type: "info",
+      autoDismissMs: 2500
+    });
+  };
+
+  const showTooltipTop = () => {
+    overlay.tooltip({
+      anchorRef: bottomLeftAnchorRef,
+      text: "Pinned above the anchor.",
+      placement: "top",
+      type: "warning"
+    });
+  };
+
+  const showTooltipCustom = () => {
+    overlay.tooltip({
+      anchorRef: topRightAnchorRef,
+      placement: "bottom",
+      type: "success",
+      render: (api) => (
+        <View style={styles.customTooltip}>
+          <Text style={styles.customTooltipTitle}>Custom tooltip</Text>
+          <Text style={styles.customTooltipBody}>
+            Render override with custom layout.
+          </Text>
+          <Pressable onPress={api.hide} style={styles.customTooltipButton}>
+            <Text style={styles.customTooltipButtonText}>Got it</Text>
+          </Pressable>
+        </View>
+      )
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -421,22 +462,22 @@ const TestScreen = () => {
             helper="Uses toastStyle/textStyle/backgroundColor options."
             onPress={showStyledToast}
           />
-        <ActionButton
-          label="Show custom toast"
-          helper="Uses toast.render for full UI control."
-          onPress={showCustomToast}
-        />
-        <ActionButton
-          label="Show loader (2s)"
-          helper="Blocks touches with dim backdrop, auto-hides."
-          onPress={showLoader}
-        />
-        <ActionButton
-          label="Show custom loader"
-          helper="Uses loader.render to customize UI."
-          onPress={showCustomLoader}
-        />
-      </View>
+          <ActionButton
+            label="Show custom toast"
+            helper="Uses toast.render for full UI control."
+            onPress={showCustomToast}
+          />
+          <ActionButton
+            label="Show loader (2s)"
+            helper="Blocks touches with dim backdrop, auto-hides."
+            onPress={showLoader}
+          />
+          <ActionButton
+            label="Show custom loader"
+            helper="Uses loader.render to customize UI."
+            onPress={showCustomLoader}
+          />
+        </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Custom overlays</Text>
           <ActionButton
@@ -476,6 +517,47 @@ const TestScreen = () => {
             label="Overlay allows touches"
             helper="Underlying UI should remain clickable."
             onPress={showAllowsTouches}
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Tooltip demos</Text>
+          <View style={styles.anchorStage}>
+            <View
+              ref={topRightAnchorRef}
+              collapsable={false}
+              style={[styles.anchor, styles.anchorTopRight]}
+            >
+              <Text style={styles.anchorText}>Edge</Text>
+            </View>
+            <View
+              ref={bottomLeftAnchorRef}
+              collapsable={false}
+              style={[styles.anchor, styles.anchorBottomLeft]}
+            >
+              <Text style={styles.anchorText}>Edge</Text>
+            </View>
+            <View
+              ref={centerAnchorRef}
+              collapsable={false}
+              style={[styles.anchor, styles.anchorCenter]}
+            >
+              <Text style={styles.anchorText}>Center</Text>
+            </View>
+          </View>
+          <ActionButton
+            label="Show tooltip (auto)"
+            helper="Auto placement with clamping."
+            onPress={showTooltipAuto}
+          />
+          <ActionButton
+            label="Show tooltip (top)"
+            helper="Forced top placement."
+            onPress={showTooltipTop}
+          />
+          <ActionButton
+            label="Show tooltip (custom render)"
+            helper="Uses tooltip.render for custom UI."
+            onPress={showTooltipCustom}
           />
         </View>
       </ScrollView>
@@ -695,6 +777,67 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
+  },
+  anchorStage: {
+    width: "100%",
+    height: 160,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  anchor: {
+    position: "absolute",
+    backgroundColor: "#111827",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  anchorText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  anchorTopRight: {
+    top: 8,
+    right: 8,
+  },
+  anchorBottomLeft: {
+    bottom: 8,
+    left: 8,
+  },
+  anchorCenter: {
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -24 }, { translateY: -12 }],
+  },
+  customTooltip: {
+    backgroundColor: "#0F172A",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 6,
+    maxWidth: 220,
+  },
+  customTooltipTitle: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  customTooltipBody: {
+    color: "#E2E8F0",
+    fontSize: 11,
+  },
+  customTooltipButton: {
+    alignSelf: "flex-start",
+    backgroundColor: "#38BDF8",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  customTooltipButtonText: {
+    color: "#0F172A",
+    fontSize: 11,
+    fontWeight: "700",
   },
   insetsText: {
     fontSize: 12,

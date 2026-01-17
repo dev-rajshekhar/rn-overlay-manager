@@ -12,6 +12,7 @@ import type {
 import { createOverlayStore } from "./store.js";
 import { ModalOverlay } from "./overlays/ModalOverlay.js";
 import { LoaderOverlay } from "./overlays/LoaderOverlay.js";
+import { TooltipOverlay } from "./overlays/TooltipOverlay.js";
 import { ToastOverlay } from "./overlays/ToastOverlay.js";
 
 export const OverlayContext = React.createContext<OverlayController | null>(
@@ -139,12 +140,30 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
 
   const tooltip = React.useCallback(
     (options: TooltipOptions) => {
-      const showOptions = createHelperShowOptions(
-        "tooltip",
-        options,
-        (_api, _props) => null
-      );
-      return store.show(showOptions);
+      const dismissible = options.dismissible ?? true;
+      const placement = options.placement ?? "auto";
+      const type = options.type ?? "info";
+
+      return store.show({
+        type: "tooltip",
+        props: options,
+        render: (api) => (
+          <TooltipOverlay
+            api={api}
+            options={{
+              ...options,
+              placement,
+              type,
+              dismissible
+            }}
+          />
+        ),
+        priority: 70,
+        dismissible,
+        blockTouches: false,
+        backdrop: "transparent",
+        insets: "none"
+      });
     },
     [store]
   );

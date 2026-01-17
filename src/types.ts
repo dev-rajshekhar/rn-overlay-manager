@@ -97,10 +97,17 @@ export type ToastOptions = {
 /** Convenience tooltip options */
 export type TooltipOptions = {
   anchorRef: React.RefObject<View>;
-  text: string;
-  placement?: "top" | "bottom";
+  text?: string;
+  placement?: "top" | "bottom" | "auto";
+  type?: "info" | "success" | "warning" | "error";
   /** close on outside press */
   dismissible?: boolean;
+  autoDismissMs?: number;
+  styles?: {
+    container?: StyleProp<ViewStyle>;
+    text?: StyleProp<TextStyle>;
+  };
+  render?: (api: OverlayRenderApi, data: TooltipOptions) => React.ReactNode;
 };
 
 /** Convenience modal options */
