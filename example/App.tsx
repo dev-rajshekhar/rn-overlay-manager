@@ -10,9 +10,53 @@ import {
 
 type OverlayRenderProps = {
   title: string;
+  description?: string;
   align?: "center" | "bottom" | "top";
   allowTouches?: boolean;
   backdropDismiss?: boolean;
+  debug: OverlayDebugInfo;
+};
+
+type OverlayDebugInfo = {
+  type: string;
+  dismissible: boolean;
+  blockTouches: boolean;
+  priority: number;
+  insets?: string;
+};
+
+type ActionButtonProps = {
+  label: string;
+  helper: string;
+  onPress: () => void;
+};
+
+const OverlayDebugCard = ({ info }: { info: OverlayDebugInfo }) => {
+  return (
+    <View style={styles.debugCard}>
+      <Text style={styles.debugTitle}>Debug</Text>
+      <Text style={styles.debugText}>Type: {info.type}</Text>
+      <Text style={styles.debugText}>
+        Dismissible: {info.dismissible ? "true" : "false"}
+      </Text>
+      <Text style={styles.debugText}>
+        Block touches: {info.blockTouches ? "true" : "false"}
+      </Text>
+      <Text style={styles.debugText}>Priority: {info.priority}</Text>
+      <Text style={styles.debugText}>Insets mode: {info.insets ?? "default"}</Text>
+    </View>
+  );
+};
+
+const ActionButton = ({ label, helper, onPress }: ActionButtonProps) => {
+  return (
+    <View style={styles.actionRow}>
+      <Pressable style={styles.button} onPress={onPress}>
+        <Text style={styles.buttonText}>{label}</Text>
+      </Pressable>
+      <Text style={styles.helperText}>{helper}</Text>
+    </View>
+  );
 };
 
 const TestScreen = () => {
@@ -51,6 +95,10 @@ const TestScreen = () => {
         ) : null}
         <View pointerEvents="auto" style={styles.card}>
           <Text style={styles.cardTitle}>{props.title}</Text>
+          {props.description ? (
+            <Text style={styles.cardDescription}>{props.description}</Text>
+          ) : null}
+          <OverlayDebugCard info={props.debug} />
           <Text style={styles.insetsText}>{getInsetsText(api)}</Text>
           {hasZeroInsets(api) ? (
             <Text style={styles.warningText}>
@@ -70,8 +118,15 @@ const TestScreen = () => {
       type: "custom",
       props: {
         title: "Dismissible Overlay",
+        description: "Backdrop tap should dismiss this overlay.",
         align: "center",
         backdropDismiss: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 1,
+        },
       },
       render: renderOverlay,
       priority: 1,
@@ -84,7 +139,17 @@ const TestScreen = () => {
   const showNonDismissible = () => {
     overlay.show({
       type: "custom",
-      props: { title: "Non-dismissible Overlay", align: "center" },
+      props: {
+        title: "Non-dismissible Overlay",
+        description: "Backdrop tap should NOT dismiss.",
+        align: "center",
+        debug: {
+          type: "custom",
+          dismissible: false,
+          blockTouches: true,
+          priority: 1,
+        },
+      },
       render: renderOverlay,
       priority: 1,
       dismissible: false,
@@ -98,8 +163,16 @@ const TestScreen = () => {
       type: "custom",
       props: {
         title: "Bottom Overlay (safe area)",
+        description: "Bottom-aligned and padded by safe-area insets.",
         align: "bottom",
         backdropDismiss: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 2,
+          insets: "safeArea",
+        },
       },
       render: renderOverlay,
       priority: 2,
@@ -110,30 +183,21 @@ const TestScreen = () => {
     });
   };
 
-  const showBottomNoInsets = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Bottom Overlay (no insets)",
-        align: "bottom",
-        backdropDismiss: true,
-      },
-      render: renderOverlay,
-      priority: 2,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-      insets: "none",
-    });
-  };
-
   const showTopSafeArea = () => {
     overlay.show({
       type: "custom",
       props: {
         title: "Top Overlay (safe area)",
+        description: "Top-aligned and padded for Dynamic Island/notch.",
         align: "top",
         backdropDismiss: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 2,
+          insets: "safeArea",
+        },
       },
       render: renderOverlay,
       priority: 2,
@@ -147,7 +211,17 @@ const TestScreen = () => {
   const showBlocksTouches = () => {
     overlay.show({
       type: "custom",
-      props: { title: "Overlay blocks touches", align: "center" },
+      props: {
+        title: "Overlay blocks touches",
+        description: "Underlying UI should NOT be clickable.",
+        align: "center",
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 3,
+        },
+      },
       render: renderOverlay,
       priority: 3,
       dismissible: true,
@@ -161,13 +235,20 @@ const TestScreen = () => {
       type: "custom",
       props: {
         title: "Overlay allows touches",
+        description: "Underlying UI should remain clickable.",
         align: "center",
-        backdropDismiss: true,
+        allowTouches: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: false,
+          priority: 3,
+        },
       },
       render: renderOverlay,
       priority: 3,
       dismissible: true,
-      blockTouches: true,
+      blockTouches: false,
       backdrop: "dim",
     });
   };
@@ -177,8 +258,15 @@ const TestScreen = () => {
       type: "custom",
       props: {
         title: "Low Priority Overlay",
+        description: "Should appear behind the high-priority overlay.",
         align: "center",
         backdropDismiss: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 1,
+        },
       },
       render: renderOverlay,
       priority: 1,
@@ -191,8 +279,15 @@ const TestScreen = () => {
       type: "custom",
       props: {
         title: "High Priority Overlay",
+        description: "Should appear above the low-priority overlay.",
         align: "center",
         backdropDismiss: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 10,
+        },
       },
       render: renderOverlay,
       priority: 10,
@@ -208,12 +303,29 @@ const TestScreen = () => {
       backdrop: "dim",
       render: (api) => (
         <View style={styles.modalContentContainer}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Built-in modal</Text>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Built-in modal</Text>
+            <Text style={styles.modalDescription}>
+              This uses overlay.modal() with a dim backdrop and safe-area padding.
+            </Text>
+            <OverlayDebugCard
+              info={{
+                type: "modal",
+                dismissible: true,
+                blockTouches: true,
+                priority: 90,
+                insets: "safeArea",
+              }}
+            />
             <Text style={styles.insetsText}>{getInsetsText(api)}</Text>
-            <Pressable style={styles.button} onPress={api.hide}>
-              <Text style={styles.buttonText}>Close</Text>
-            </Pressable>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.secondaryButton} onPress={api.hide}>
+                <Text style={styles.secondaryButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.primaryButton} onPress={api.hide}>
+                <Text style={styles.primaryButtonText}>Confirm</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       ),
@@ -223,36 +335,55 @@ const TestScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>rn-overlay-manager example</Text>
-      <Pressable style={styles.button} onPress={showDismissible}>
-        <Text style={styles.buttonText}>Show dismissible overlay</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={showNonDismissible}>
-        <Text style={styles.buttonText}>Show non-dismissible overlay</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={showBottomSafeArea}>
-        <Text style={styles.buttonText}>Show bottom overlay (safe area)</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={showBottomNoInsets}>
-        <Text style={styles.buttonText}>Show bottom overlay (no insets)</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={showTopSafeArea}>
-        <Text style={styles.buttonText}>Show top overlay (safe area)</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={showBlocksTouches}>
-        <Text style={styles.buttonText}>Overlay blocks touches</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={showAllowsTouches}>
-        <Text style={styles.buttonText}>Overlay allows touches</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={showBuiltInModal}>
-        <Text style={styles.buttonText}>Show built-in modal</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={showTwoOverlays}>
-        <Text style={styles.buttonText}>Show two overlays (priority)</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={() => overlay.hideAll()}>
-        <Text style={styles.buttonText}>Hide all</Text>
-      </Pressable>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Built-in APIs</Text>
+        <ActionButton
+          label="Show built-in modal"
+          helper="Dim backdrop, dismissible, shows inset/debug details."
+          onPress={showBuiltInModal}
+        />
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Custom overlays</Text>
+        <ActionButton
+          label="Custom dismissible overlay"
+          helper="Tap outside to dismiss."
+          onPress={showDismissible}
+        />
+        <ActionButton
+          label="Custom non-dismissible overlay"
+          helper="Backdrop tap should NOT dismiss."
+          onPress={showNonDismissible}
+        />
+        <ActionButton
+          label="Bottom overlay (safe area)"
+          helper="Bottom-aligned with safe-area padding."
+          onPress={showBottomSafeArea}
+        />
+        <ActionButton
+          label="Top overlay (safe area)"
+          helper="Top-aligned below Dynamic Island/notch."
+          onPress={showTopSafeArea}
+        />
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Behavior tests</Text>
+        <ActionButton
+          label="Priority demo (two overlays)"
+          helper="High priority should appear above low priority."
+          onPress={showTwoOverlays}
+        />
+        <ActionButton
+          label="Overlay blocks touches"
+          helper="Underlying UI should NOT be clickable."
+          onPress={showBlocksTouches}
+        />
+        <ActionButton
+          label="Overlay allows touches"
+          helper="Underlying UI should remain clickable."
+          onPress={showAllowsTouches}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -277,14 +408,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
+    justifyContent: "flex-start",
     paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 32,
   },
   title: {
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 8,
+  },
+  section: {
+    width: "100%",
+    gap: 10,
+    marginTop: 16,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#111827",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  actionRow: {
+    gap: 6,
   },
   button: {
     backgroundColor: "#111827",
@@ -297,6 +444,10 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontWeight: "600",
+  },
+  helperText: {
+    fontSize: 12,
+    color: "#6B7280",
   },
   overlayContainer: {
     flex: 1,
@@ -330,6 +481,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
   },
+  modalCard: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderRadius: 16,
+    width: "100%",
+    maxWidth: 360,
+    gap: 12,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  modalDescription: {
+    fontSize: 14,
+    color: "#374151",
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "flex-end",
+  },
+  primaryButton: {
+    backgroundColor: "#111827",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  secondaryButton: {
+    backgroundColor: "#E5E7EB",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  secondaryButtonText: {
+    color: "#111827",
+    fontWeight: "600",
+  },
   card: {
     backgroundColor: "#FFFFFF",
     padding: 20,
@@ -341,6 +533,27 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  cardDescription: {
+    fontSize: 13,
+    color: "#374151",
+    textAlign: "center",
+  },
+  debugCard: {
+    width: "100%",
+    backgroundColor: "#F3F4F6",
+    borderRadius: 10,
+    padding: 10,
+    gap: 4,
+  },
+  debugTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  debugText: {
+    fontSize: 12,
+    color: "#374151",
   },
   insetsText: {
     fontSize: 12,
