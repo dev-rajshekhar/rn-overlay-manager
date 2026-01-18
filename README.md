@@ -1,6 +1,9 @@
 # rn-overlay-manager
 
-Imperative overlay manager for React Native. Show modals, toasts, tooltips, and loaders from anywhere via a simple hook.
+[![npm version](https://img.shields.io/npm/v/rn-overlay-manager.svg)](https://www.npmjs.com/package/rn-overlay-manager)
+[![npm downloads](https://img.shields.io/npm/dm/rn-overlay-manager.svg)](https://www.npmjs.com/package/rn-overlay-manager)
+
+Overlay manager for React Native. Show modals, toasts, tooltips, and loaders from anywhere via a simple hook.
 
 ## Installation
 
