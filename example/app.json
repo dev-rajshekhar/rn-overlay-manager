@@ -3,7 +3,7 @@
     "name": "rn-overlay-manager example",
     "slug": "rn-overlay-manager-example",
     "version": "0.0.1",
-    "orientation": "portrait",
+    "orientation": "default",
     "userInterfaceStyle": "light",
     "assetBundlePatterns": ["**/*"]
   }
