@@ -176,7 +176,7 @@ const DemoScreen = ({
 
         <View style={styles.card}>
           <View style={styles.cardHeaderRow}>
-            <View>
+            <View style={styles.cardHeaderText}>
               <Text style={styles.cardTitle}>Tooltip alignment</Text>
               <Text style={styles.cardBody}>
                 Tap the help icon near the edge to verify clamping.
@@ -291,6 +291,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
+  },
+  cardHeaderText: {
+    flex: 1,
   },
   cardTitle: {
     fontSize: 16,
