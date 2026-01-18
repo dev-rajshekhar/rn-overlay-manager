@@ -39,6 +39,7 @@ export type OverlayItem<P = unknown> = {
   id: string;
   type: OverlayType;
   createdAt: number;
+  group?: string;
 
   /** Higher priority renders above lower priority */
   priority: number;
@@ -140,6 +141,7 @@ export interface OverlayController {
   show<P = unknown>(options: OverlayShowOptions<P>): string;
   hide(id: string): void;
   hideAll(type?: OverlayType): void;
+  hideGroup(group: string): void;
 
   /** convenience helpers */
   toast(options: ToastOptions): string;

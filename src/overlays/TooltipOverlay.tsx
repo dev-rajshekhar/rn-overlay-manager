@@ -9,6 +9,7 @@ import {
 import type { LayoutRectangle } from "react-native";
 import type { OverlayRenderApi, TooltipOptions } from "../types.js";
 import { useOptionalSafeAreaInsets } from "../insets.js";
+import { warnTooltipAnchorInvalid } from "../devWarnings.js";
 
 type TooltipOverlayProps = {
   api: OverlayRenderApi;
@@ -51,12 +52,15 @@ export const TooltipOverlay = ({ api, options }: TooltipOverlayProps) => {
   React.useEffect(() => {
     const node = options.anchorRef?.current;
     if (!node || typeof node.measureInWindow !== "function") {
+      warnTooltipAnchorInvalid();
       return;
     }
     node.measureInWindow((x: number, y: number, width: number, height: number) => {
       if (Number.isFinite(x) && Number.isFinite(y)) {
         setAnchorLayout({ x, y, width, height });
+        return;
       }
+      warnTooltipAnchorInvalid();
     });
   }, [options.anchorRef]);
 

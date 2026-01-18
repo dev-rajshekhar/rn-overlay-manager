@@ -9,6 +9,7 @@ export type OverlayStore = {
   show: <P = unknown>(options: OverlayShowOptions<P>) => string;
   hide: (id: string) => void;
   hideAll: (type?: OverlayType) => void;
+  hideGroup: (group: string) => void;
 };
 
 type SetItems = Dispatch<SetStateAction<OverlayItem[]>>;
@@ -34,6 +35,7 @@ export const createOverlayStore = (setItems: SetItems): OverlayStore => {
       id,
       type: options.type,
       createdAt: Date.now(),
+      group: options.group,
       priority: options.priority ?? 0,
       dismissible: options.dismissible ?? true,
       blockTouches: options.blockTouches ?? false,
@@ -70,5 +72,9 @@ export const createOverlayStore = (setItems: SetItems): OverlayStore => {
     });
   };
 
-  return { show, hide, hideAll };
+  const hideGroup = (group: string): void => {
+    setItems((prev) => prev.filter((item) => item.group !== group));
+  };
+
+  return { show, hide, hideAll, hideGroup };
 };

@@ -189,6 +189,31 @@ const TestScreen = () => {
     });
   };
 
+  const showBottomSafeAreaTabBar = () => {
+    overlay.show({
+      type: "custom",
+      props: {
+        title: "Bottom Overlay (safe area + tab bar)",
+        description: "Adds tabBarHeight to bottom safe area padding.",
+        align: "bottom",
+        backdropDismiss: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 2,
+          insets: "safeArea+tabBar",
+        },
+      },
+      render: renderOverlay,
+      priority: 2,
+      dismissible: true,
+      blockTouches: true,
+      backdrop: "dim",
+      insets: "safeArea+tabBar",
+    });
+  };
+
   const showTopSafeArea = () => {
     overlay.show({
       type: "custom",
@@ -301,6 +326,56 @@ const TestScreen = () => {
       blockTouches: true,
       backdrop: "dim",
     });
+  };
+
+  const showGroupOverlays = () => {
+    overlay.show({
+      type: "custom",
+      group: "demo-group",
+      props: {
+        title: "Group overlay A",
+        description: "Hide group should close all in this group.",
+        align: "center",
+        backdropDismiss: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 5,
+        },
+      },
+      render: renderOverlay,
+      priority: 5,
+      dismissible: true,
+      blockTouches: true,
+      backdrop: "dim",
+    });
+
+    overlay.show({
+      type: "custom",
+      group: "demo-group",
+      props: {
+        title: "Group overlay B",
+        description: "Also belongs to demo-group.",
+        align: "center",
+        backdropDismiss: true,
+        debug: {
+          type: "custom",
+          dismissible: true,
+          blockTouches: true,
+          priority: 6,
+        },
+      },
+      render: renderOverlay,
+      priority: 6,
+      dismissible: true,
+      blockTouches: true,
+      backdrop: "dim",
+    });
+  };
+
+  const hideGroupOverlays = () => {
+    overlay.hideGroup("demo-group");
   };
 
   const showBuiltInModal = () => {
@@ -521,6 +596,11 @@ const TestScreen = () => {
             onPress={showBottomSafeArea}
           />
           <ActionButton
+            label="Bottom overlay (safe area + tab bar)"
+            helper="Adds tab bar height to bottom padding."
+            onPress={showBottomSafeAreaTabBar}
+          />
+          <ActionButton
             label="Top overlay (safe area)"
             helper="Top-aligned below Dynamic Island/notch."
             onPress={showTopSafeArea}
@@ -542,6 +622,16 @@ const TestScreen = () => {
             label="Overlay allows touches"
             helper="Underlying UI should remain clickable."
             onPress={showAllowsTouches}
+          />
+          <ActionButton
+            label="Show group overlays"
+            helper="Creates two overlays with group demo-group."
+            onPress={showGroupOverlays}
+          />
+          <ActionButton
+            label="Hide group overlays"
+            helper="Calls overlay.hideGroup('demo-group')."
+            onPress={hideGroupOverlays}
           />
         </View>
         <View style={styles.section}>
@@ -603,7 +693,7 @@ const TestScreen = () => {
 const App = () => {
   return (
     <SafeAreaProvider>
-      <OverlayProvider>
+      <OverlayProvider tabBarHeight={60}>
         <View style={styles.appRoot}>
           <TestScreen />
           <OverlayHost />

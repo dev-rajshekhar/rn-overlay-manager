@@ -2,7 +2,12 @@ import * as React from "react";
 import { BackHandler, View } from "react-native";
 import type { Insets, InsetsMode, OverlayItem, OverlayRenderApi } from "./types.js";
 import { useOptionalSafeAreaInsets } from "./insets.js";
-import { OverlayContext, OverlayItemsContext } from "./OverlayProvider.js";
+import { registerHost, unregisterHost } from "./devWarnings.js";
+import {
+  OverlayConfigContext,
+  OverlayContext,
+  OverlayItemsContext
+} from "./OverlayProvider.js";
 
 const sortByPriority = (items: OverlayItem[]): OverlayItem[] => {
   return items
@@ -13,6 +18,7 @@ const sortByPriority = (items: OverlayItem[]): OverlayItem[] => {
 export const OverlayHost = () => {
   const controller = React.useContext(OverlayContext);
   const items = React.useContext(OverlayItemsContext);
+  const config = React.useContext(OverlayConfigContext);
   const safeAreaInsets = useOptionalSafeAreaInsets();
 
   if (!controller || !items) {
@@ -26,9 +32,16 @@ export const OverlayHost = () => {
       if (!mode || mode === "none") {
         return { top: 0, bottom: 0, left: 0, right: 0 };
       }
-      if (mode === "safeArea" || mode === "safeArea+tabBar") {
-        // TODO: add tab bar offset for safeArea+tabBar mode.
+      if (mode === "safeArea") {
         return safeAreaInsets;
+      }
+      if (mode === "safeArea+tabBar") {
+        return {
+          top: safeAreaInsets.top,
+          left: safeAreaInsets.left,
+          right: safeAreaInsets.right,
+          bottom: safeAreaInsets.bottom + (config?.tabBarHeight ?? 0)
+        };
       }
       return {
         top: mode.top ?? 0,
@@ -37,8 +50,13 @@ export const OverlayHost = () => {
         right: mode.right ?? 0
       };
     },
-    [safeAreaInsets]
+    [config?.tabBarHeight, safeAreaInsets]
   );
+
+  React.useEffect(() => {
+    registerHost();
+    return () => unregisterHost();
+  }, []);
 
   React.useEffect(() => {
     if (orderedItems.length === 0) {
