@@ -28,7 +28,7 @@ import { OverlayHost, OverlayProvider } from "rn-overlay-manager";
 
 export default function App() {
   return (
-    <OverlayProvider>
+    <OverlayProvider tabBarHeight={0}>
       {/* app content */}
       <OverlayHost />
     </OverlayProvider>
@@ -185,6 +185,12 @@ overlay.hide(id);
 | `priority` | `number` | Higher value renders above lower. |
 | `insets` | `"safeArea" \| "none" \| {...}` | Insets strategy. |
 
+### OverlayProvider props
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `tabBarHeight` | `number` | `0` | Used by `insets="safeArea+tabBar"`. |
+
 ## Example app
 
 ```sh
@@ -199,7 +205,7 @@ cd example && npm i && npx expo start
 
 ## Safe-area note
 
-Insets read from `react-native-safe-area-context` when available. If it is not installed or not provided, insets default to zero. Use `OverlayProvider` `tabBarHeight` when using `insets="safeArea+tabBar"`.
+Insets read from `react-native-safe-area-context` when available. If it is not installed or not provided, insets default to zero. Use `tabBarHeight` when using `insets="safeArea+tabBar"`.
 
 ## License
 
