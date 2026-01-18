@@ -1,526 +1,79 @@
 import * as React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
   OverlayHost,
   OverlayProvider,
   useOverlay,
-  type OverlayRenderApi,
   type TooltipAnchorRef,
 } from "rn-overlay-manager";
 
-type OverlayRenderProps = {
-  title: string;
-  description?: string;
-  align?: "center" | "bottom" | "top";
-  allowTouches?: boolean;
-  backdropDismiss?: boolean;
-  debug: OverlayDebugInfo;
-};
-
-type OverlayDebugInfo = {
-  type: string;
-  dismissible: boolean;
-  blockTouches: boolean;
-  priority: number;
-  insets?: string;
-};
-
-type ActionButtonProps = {
-  label: string;
-  helper: string;
-  onPress: () => void;
-};
-
-const OverlayDebugCard = ({ info }: { info: OverlayDebugInfo }) => {
-  return (
-    <View style={styles.debugCard}>
-      <Text style={styles.debugTitle}>Debug</Text>
-      <Text style={styles.debugText}>Type: {info.type}</Text>
-      <Text style={styles.debugText}>
-        Dismissible: {info.dismissible ? "true" : "false"}
-      </Text>
-      <Text style={styles.debugText}>
-        Block touches: {info.blockTouches ? "true" : "false"}
-      </Text>
-      <Text style={styles.debugText}>Priority: {info.priority}</Text>
-      <Text style={styles.debugText}>
-        Insets mode: {info.insets ?? "default"}
-      </Text>
-    </View>
-  );
-};
-
-const ActionButton = ({ label, helper, onPress }: ActionButtonProps) => {
-  return (
-    <View style={styles.actionRow}>
-      <Pressable style={styles.button} onPress={onPress}>
-        <Text style={styles.buttonText}>{label}</Text>
-      </Pressable>
-      <Text style={styles.helperText}>{helper}</Text>
-    </View>
-  );
-};
-
-const TestScreen = () => {
+const DemoScreen = ({
+  simulateTabBar,
+  setSimulateTabBar,
+}: {
+  simulateTabBar: boolean;
+  setSimulateTabBar: (value: boolean) => void;
+}) => {
   const overlay = useOverlay();
-  const centerAnchorRef = React.useRef<View | null>(null);
-  const topRightAnchorRef = React.useRef<View | null>(null);
-  const bottomLeftAnchorRef = React.useRef<View | null>(null);
-
-  const getInsetsText = (api: OverlayRenderApi) => {
-    const insets = api.insets ?? { top: 0, bottom: 0, left: 0, right: 0 };
-    return `Insets: top=${insets.top} bottom=${insets.bottom} left=${insets.left} right=${insets.right}`;
-  };
-
-  const hasZeroInsets = (api: OverlayRenderApi) => {
-    const insets = api.insets ?? { top: 0, bottom: 0, left: 0, right: 0 };
-    return (
-      insets.top === 0 &&
-      insets.bottom === 0 &&
-      insets.left === 0 &&
-      insets.right === 0
-    );
-  };
-
-  const renderOverlay = (api: OverlayRenderApi, props: OverlayRenderProps) => {
-    const alignStyle =
-      props.align === "bottom"
-        ? styles.overlayBottom
-        : props.align === "top"
-          ? styles.overlayTop
-          : styles.overlayCenter;
-
-    return (
-      <View
-        style={[styles.overlayContainer, alignStyle]}
-        pointerEvents={props.allowTouches ? "box-none" : "auto"}
-      >
-        {props.backdropDismiss ? (
-          <Pressable style={StyleSheet.absoluteFill} onPress={api.hide} />
-        ) : null}
-        <View pointerEvents="auto" style={styles.card}>
-          <Text style={styles.cardTitle}>{props.title}</Text>
-          {props.description ? (
-            <Text style={styles.cardDescription}>{props.description}</Text>
-          ) : null}
-          <OverlayDebugCard info={props.debug} />
-          <Text style={styles.insetsText}>{getInsetsText(api)}</Text>
-          {hasZeroInsets(api) ? (
-            <Text style={styles.warningText}>
-              Safe-area insets are 0. Ensure SafeAreaProvider is set up.
-            </Text>
-          ) : null}
-          <Pressable style={styles.button} onPress={api.hide}>
-            <Text style={styles.buttonText}>Close</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
-  };
-
-  const showDismissible = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Dismissible Overlay",
-        description: "Backdrop tap should dismiss this overlay.",
-        align: "center",
-        backdropDismiss: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 1,
-        },
-      },
-      render: renderOverlay,
-      priority: 1,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-    });
-  };
-
-  const showNonDismissible = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Non-dismissible Overlay",
-        description: "Backdrop tap should NOT dismiss.",
-        align: "center",
-        debug: {
-          type: "custom",
-          dismissible: false,
-          blockTouches: true,
-          priority: 1,
-        },
-      },
-      render: renderOverlay,
-      priority: 1,
-      dismissible: false,
-      blockTouches: true,
-      backdrop: "dim",
-    });
-  };
-
-  const showBottomSafeArea = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Bottom Overlay (safe area)",
-        description: "Bottom-aligned and padded by safe-area insets.",
-        align: "bottom",
-        backdropDismiss: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 2,
-          insets: "safeArea",
-        },
-      },
-      render: renderOverlay,
-      priority: 2,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-      insets: "safeArea",
-    });
-  };
-
-  const showBottomSafeAreaTabBar = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Bottom Overlay (safe area + tab bar)",
-        description: "Adds tabBarHeight to bottom safe area padding.",
-        align: "bottom",
-        backdropDismiss: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 2,
-          insets: "safeArea+tabBar",
-        },
-      },
-      render: renderOverlay,
-      priority: 2,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-      insets: "safeArea+tabBar",
-    });
-  };
-
-  const showTopSafeArea = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Top Overlay (safe area)",
-        description: "Top-aligned and padded for Dynamic Island/notch.",
-        align: "top",
-        backdropDismiss: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 2,
-          insets: "safeArea",
-        },
-      },
-      render: renderOverlay,
-      priority: 2,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-      insets: "safeArea",
-    });
-  };
-
-  const showBlocksTouches = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Overlay blocks touches",
-        description: "Underlying UI should NOT be clickable.",
-        align: "center",
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 3,
-        },
-      },
-      render: renderOverlay,
-      priority: 3,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-    });
-  };
-
-  const showAllowsTouches = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Overlay allows touches",
-        description: "Underlying UI should remain clickable.",
-        align: "center",
-        allowTouches: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: false,
-          priority: 3,
-        },
-      },
-      render: renderOverlay,
-      priority: 3,
-      dismissible: true,
-      blockTouches: false,
-      backdrop: "dim",
-    });
-  };
-
-  const showTwoOverlays = () => {
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "Low Priority Overlay",
-        description: "Should appear behind the high-priority overlay.",
-        align: "center",
-        backdropDismiss: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 1,
-        },
-      },
-      render: renderOverlay,
-      priority: 1,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-    });
-
-    overlay.show({
-      type: "custom",
-      props: {
-        title: "High Priority Overlay",
-        description: "Should appear above the low-priority overlay.",
-        align: "center",
-        backdropDismiss: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 10,
-        },
-      },
-      render: renderOverlay,
-      priority: 10,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-    });
-  };
-
-  const showGroupOverlays = () => {
-    overlay.show({
-      type: "custom",
-      group: "demo-group",
-      props: {
-        title: "Group overlay A",
-        description: "Hide group should close all in this group.",
-        align: "center",
-        backdropDismiss: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 5,
-        },
-      },
-      render: renderOverlay,
-      priority: 5,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-    });
-
-    overlay.show({
-      type: "custom",
-      group: "demo-group",
-      props: {
-        title: "Group overlay B",
-        description: "Also belongs to demo-group.",
-        align: "center",
-        backdropDismiss: true,
-        debug: {
-          type: "custom",
-          dismissible: true,
-          blockTouches: true,
-          priority: 6,
-        },
-      },
-      render: renderOverlay,
-      priority: 6,
-      dismissible: true,
-      blockTouches: true,
-      backdrop: "dim",
-    });
-  };
-
-  const hideGroupOverlays = () => {
-    overlay.hideGroup("demo-group");
-  };
-
-  const showBuiltInModal = () => {
-    overlay.modal({
-      dismissible: true,
-      backdrop: "dim",
-      render: (api) => (
-        <View style={styles.modalContentContainer}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Built-in modal</Text>
-            <Text style={styles.modalDescription}>
-              This uses overlay.modal() with a dim backdrop and safe-area
-              padding.
-            </Text>
-            <OverlayDebugCard
-              info={{
-                type: "modal",
-                dismissible: true,
-                blockTouches: true,
-                priority: 90,
-                insets: "safeArea",
-              }}
-            />
-            <Text style={styles.insetsText}>{getInsetsText(api)}</Text>
-            <View style={styles.modalActions}>
-              <Pressable style={styles.secondaryButton} onPress={api.hide}>
-                <Text style={styles.secondaryButtonText}>Cancel</Text>
-              </Pressable>
-              <Pressable style={styles.primaryButton} onPress={api.hide}>
-                <Text style={styles.primaryButtonText}>Confirm</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      ),
-    });
-  };
-
-  const showToastBottom = () => {
-    overlay.toast({ message: "Bottom toast", placement: "bottom" });
-  };
-
-  const showToastTop = () => {
-    overlay.toast({ message: "Top toast", placement: "top" });
-  };
-
-  const queueToasts = () => {
-    overlay.toast({ message: "Queued toast 1", placement: "bottom" });
-    overlay.toast({ message: "Queued toast 2", placement: "bottom" });
-    overlay.toast({ message: "Queued toast 3", placement: "bottom" });
-  };
-
-  const showStyledToast = () => {
-    overlay.toast({
-      message: "Styled toast",
-      placement: "bottom",
-      backgroundColor: "#2563EB",
-      textStyle: { fontWeight: "700" },
-      toastStyle: { borderRadius: 12 },
-    });
-  };
+  const tooltipAnchorRef = React.useRef<View | null>(null);
 
   const showCustomToast = () => {
     overlay.toast({
       message: "Custom toast",
-      placement: "top",
+      placement: "bottom",
       render: () => (
-        <View style={styles.customToast}>
-          <Text style={styles.customToastTitle}>Custom toast</Text>
-          <Text style={styles.customToastBody}>Fully custom render.</Text>
+        <View style={styles.toastCard}>
+          <Text style={styles.toastTitle}>Profile updated</Text>
+          <Text style={styles.toastBody}>Your changes are live.</Text>
         </View>
       ),
     });
   };
 
-  const showLoader = () => {
-    const id = overlay.loader({ message: "Loading for 2s..." });
-    setTimeout(() => overlay.hide(id), 2000);
+  const showQueuedToasts = () => {
+    overlay.toast({ message: "Queued toast 1" });
+    overlay.toast({ message: "Queued toast 2" });
   };
 
-  const showCustomLoader = () => {
-    const id = overlay.loader({
-      render: () => (
-        <View style={styles.customLoaderContainer}>
-          <View style={styles.customLoader}>
-            <Text style={styles.customLoaderTitle}>Custom loader</Text>
-            <Text style={styles.customLoaderBody}>
-              Waiting on something important.
-            </Text>
-          </View>
-        </View>
-      ),
-    });
-    setTimeout(() => overlay.hide(id), 2000);
+  const showTopToast = () => {
+    overlay.toast({ message: "Top toast", placement: "top" });
   };
 
-  const showTooltipAuto = () => {
+  const showBottomToast = () => {
+    overlay.toast({ message: "Bottom toast", placement: "bottom" });
+  };
+
+  const showTooltip = () => {
     overlay.tooltip({
-      anchorRef: centerAnchorRef as unknown as TooltipAnchorRef,
-      text: "Auto placement tooltip.",
+      anchorRef: tooltipAnchorRef as unknown as TooltipAnchorRef,
+      text: "This hint is clamped to the screen edge.",
       placement: "auto",
-      type: "success",
-      autoDismissMs: 2500,
-    });
-  };
-
-  const showTooltipTop = () => {
-    overlay.tooltip({
-      anchorRef: bottomLeftAnchorRef as unknown as TooltipAnchorRef,
-      text: "Pinned above the anchor.",
-      placement: "top",
-      type: "warning",
-    });
-  };
-
-  const showTooltipLeft = () => {
-    overlay.tooltip({
-      anchorRef: centerAnchorRef as unknown as TooltipAnchorRef,
-      text: "Left placement tooltip.",
-      placement: "left",
-      type: "info",
-    });
-  };
-
-  const showTooltipRight = () => {
-    overlay.tooltip({
-      anchorRef: centerAnchorRef as unknown as TooltipAnchorRef,
-      text: "Right placement tooltip.",
-      placement: "right",
       type: "info",
     });
   };
 
   const showTooltipCustom = () => {
     overlay.tooltip({
-      anchorRef: topRightAnchorRef as unknown as TooltipAnchorRef,
-      placement: "bottom",
-      type: "success",
+      anchorRef: tooltipAnchorRef as unknown as TooltipAnchorRef,
+      placement: "auto",
+      styles: {
+        container: styles.customTooltipContainer,
+      },
       render: (api) => (
         <View style={styles.customTooltip}>
           <Text style={styles.customTooltipTitle}>Custom tooltip</Text>
           <Text style={styles.customTooltipBody}>
-            Render override with custom layout.
+            Compact, branded, and fully custom.
           </Text>
-          <Pressable onPress={api.hide} style={styles.customTooltipButton}>
+          <Pressable style={styles.customTooltipButton} onPress={api.hide}>
             <Text style={styles.customTooltipButtonText}>Got it</Text>
           </Pressable>
         </View>
@@ -528,162 +81,158 @@ const TestScreen = () => {
     });
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.title}>rn-overlay-manager example</Text>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Built-in APIs</Text>
-          <ActionButton
-            label="Show built-in modal"
-            helper="Dim backdrop, dismissible, shows inset/debug details."
-            onPress={showBuiltInModal}
-          />
-          <ActionButton
-            label="Show toast (bottom)"
-            helper="Non-blocking toast aligned to bottom safe area."
-            onPress={showToastBottom}
-          />
-          <ActionButton
-            label="Show toast (top)"
-            helper="Non-blocking toast aligned to top safe area."
-            onPress={showToastTop}
-          />
-          <ActionButton
-            label="Queue 3 toasts"
-            helper="Toasts should appear one after another."
-            onPress={queueToasts}
-          />
-          <ActionButton
-            label="Show styled toast"
-            helper="Uses toastStyle/textStyle/backgroundColor options."
-            onPress={showStyledToast}
-          />
-          <ActionButton
-            label="Show custom toast"
-            helper="Uses toast.render for full UI control."
-            onPress={showCustomToast}
-          />
-          <ActionButton
-            label="Show loader (2s)"
-            helper="Blocks touches with dim backdrop, auto-hides."
-            onPress={showLoader}
-          />
-          <ActionButton
-            label="Show custom loader"
-            helper="Uses loader.render to customize UI."
-            onPress={showCustomLoader}
-          />
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Custom overlays</Text>
-          <ActionButton
-            label="Custom dismissible overlay"
-            helper="Tap outside to dismiss."
-            onPress={showDismissible}
-          />
-          <ActionButton
-            label="Custom non-dismissible overlay"
-            helper="Backdrop tap should NOT dismiss."
-            onPress={showNonDismissible}
-          />
-          <ActionButton
-            label="Bottom overlay (safe area)"
-            helper="Bottom-aligned with safe-area padding."
-            onPress={showBottomSafeArea}
-          />
-          <ActionButton
-            label="Bottom overlay (safe area + tab bar)"
-            helper="Adds tab bar height to bottom padding."
-            onPress={showBottomSafeAreaTabBar}
-          />
-          <ActionButton
-            label="Top overlay (safe area)"
-            helper="Top-aligned below Dynamic Island/notch."
-            onPress={showTopSafeArea}
-          />
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Behavior tests</Text>
-          <ActionButton
-            label="Priority demo (two overlays)"
-            helper="High priority should appear above low priority."
-            onPress={showTwoOverlays}
-          />
-          <ActionButton
-            label="Overlay blocks touches"
-            helper="Underlying UI should NOT be clickable."
-            onPress={showBlocksTouches}
-          />
-          <ActionButton
-            label="Overlay allows touches"
-            helper="Underlying UI should remain clickable."
-            onPress={showAllowsTouches}
-          />
-          <ActionButton
-            label="Show group overlays"
-            helper="Creates two overlays with group demo-group."
-            onPress={showGroupOverlays}
-          />
-          <ActionButton
-            label="Hide group overlays"
-            helper="Calls overlay.hideGroup('demo-group')."
-            onPress={hideGroupOverlays}
-          />
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tooltip demos</Text>
-          <View style={styles.anchorStage}>
-            <View
-              ref={topRightAnchorRef}
-              collapsable={false}
-              style={[styles.anchor, styles.anchorTopRight]}
-            >
-              <Text style={styles.anchorText}>Edge</Text>
-            </View>
-            <View
-              ref={bottomLeftAnchorRef}
-              collapsable={false}
-              style={[styles.anchor, styles.anchorBottomLeft]}
-            >
-              <Text style={styles.anchorText}>Edge</Text>
-            </View>
-            <View
-              ref={centerAnchorRef}
-              collapsable={false}
-              style={[styles.anchor, styles.anchorCenter]}
-            >
-              <Text style={styles.anchorText}>Center</Text>
+  const showBottomInset = () => {
+    overlay.show({
+      type: "custom",
+      props: {},
+      render: (api) => (
+        <View style={styles.bottomSheetBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={api.hide} />
+          <View style={styles.bottomSheetWrap}>
+            <View style={styles.bottomSheetCard}>
+              <View style={styles.bottomSheetHeader}>
+                <Text style={styles.bottomSheetBadge}>Delivery</Text>
+                <Text style={styles.bottomSheetTitle}>Preferences</Text>
+              </View>
+              <Text style={styles.bottomSheetBody}>
+                This panel respects safeArea+tabBar to avoid the bottom bar.
+              </Text>
+              <View style={styles.bottomSheetList}>
+                <Text style={styles.bottomSheetItem}>
+                  - Evening slot (6–9 PM)
+                </Text>
+                <Text style={styles.bottomSheetItem}>- Contactless drop</Text>
+              </View>
+              <Pressable style={styles.outlineButton} onPress={api.hide}>
+                <Text style={styles.outlineButtonText}>Done</Text>
+              </Pressable>
             </View>
           </View>
-          <ActionButton
-            label="Show tooltip (auto)"
-            helper="Auto placement with clamping."
-            onPress={showTooltipAuto}
-          />
-          <ActionButton
-            label="Show tooltip (top)"
-            helper="Forced top placement."
-            onPress={showTooltipTop}
-          />
-          <ActionButton
-            label="Show tooltip (left)"
-            helper="Forced left placement."
-            onPress={showTooltipLeft}
-          />
-          <ActionButton
-            label="Show tooltip (right)"
-            helper="Forced right placement."
-            onPress={showTooltipRight}
-          />
-          <ActionButton
-            label="Show tooltip (custom render)"
-            helper="Uses tooltip.render for custom UI."
-            onPress={showTooltipCustom}
-          />
+        </View>
+      ),
+      priority: 20,
+      dismissible: true,
+      blockTouches: true,
+      backdrop: "dim",
+      insets: "safeArea+tabBar",
+    });
+  };
+
+  const showModal = () => {
+    overlay.modal({
+      dismissible: true,
+      backdrop: "dim",
+      render: (api) => (
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Confirm changes</Text>
+            <Text style={styles.modalBody}>
+              Review your changes before saving.
+            </Text>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.outlineButton} onPress={api.hide}>
+                <Text style={styles.outlineButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.outlineButton} onPress={api.hide}>
+                <Text style={styles.outlineButtonText}>Confirm</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      ),
+    });
+  };
+
+  const showLoader = () => {
+    const loaderId = overlay.loader({ message: "Syncing..." });
+    setTimeout(() => overlay.hide(loaderId), 1000);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>Real Flows</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Custom toast</Text>
+          <Text style={styles.cardBody}>
+            Shows a custom-rendered toast and queued messages.
+          </Text>
+          <View style={styles.row}>
+            <Pressable style={styles.outlineButton} onPress={showQueuedToasts}>
+              <Text style={styles.outlineButtonText}>Queued toasts</Text>
+            </Pressable>
+            <Pressable style={styles.outlineButton} onPress={showCustomToast}>
+              <Text style={styles.outlineButtonText}>Custom toast</Text>
+            </Pressable>
+            <Pressable style={styles.outlineButton} onPress={showTopToast}>
+              <Text style={styles.outlineButtonText}>Top toast</Text>
+            </Pressable>
+            <Pressable style={styles.outlineButton} onPress={showBottomToast}>
+              <Text style={styles.outlineButtonText}>Bottom toast</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <View>
+              <Text style={styles.cardTitle}>Tooltip alignment</Text>
+              <Text style={styles.cardBody}>
+                Tap the help icon near the edge to verify clamping.
+              </Text>
+            </View>
+            <Pressable
+              ref={tooltipAnchorRef}
+              collapsable={false}
+              onPress={showTooltip}
+              style={styles.helpIcon}
+            >
+              <Text style={styles.helpIconText}>?</Text>
+            </Pressable>
+          </View>
+          <View style={styles.row}>
+            <Pressable style={styles.outlineButton} onPress={showTooltip}>
+              <Text style={styles.outlineButtonText}>Default tooltip</Text>
+            </Pressable>
+            <Pressable style={styles.outlineButton} onPress={showTooltipCustom}>
+              <Text style={styles.outlineButtonText}>Custom tooltip</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Bottom bar inset</Text>
+          <Text style={styles.cardBody}>
+            Simulate a tab bar and show a bottom overlay with safeArea+tabBar.
+          </Text>
+          <View style={styles.row}>
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Simulate tab bar</Text>
+              <Switch
+                value={simulateTabBar}
+                onValueChange={setSimulateTabBar}
+              />
+            </View>
+            <Pressable style={styles.outlineButton} onPress={showBottomInset}>
+              <Text style={styles.outlineButtonText}>Show bottom overlay</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Modal + loader</Text>
+          <Text style={styles.cardBody}>
+            Modal and loader are separate demos.
+          </Text>
+          <View style={styles.row}>
+            <Pressable style={styles.outlineButton} onPress={showModal}>
+              <Text style={styles.outlineButtonText}>Open modal</Text>
+            </Pressable>
+            <Pressable style={styles.outlineButton} onPress={showLoader}>
+              <Text style={styles.outlineButtonText}>Show loader</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -691,11 +240,16 @@ const TestScreen = () => {
 };
 
 const App = () => {
+  const [simulateTabBar, setSimulateTabBar] = React.useState(false);
+
   return (
     <SafeAreaProvider>
-      <OverlayProvider tabBarHeight={60}>
+      <OverlayProvider tabBarHeight={simulateTabBar ? 60 : 0}>
         <View style={styles.appRoot}>
-          <TestScreen />
+          <DemoScreen
+            simulateTabBar={simulateTabBar}
+            setSimulateTabBar={setSimulateTabBar}
+          />
           <OverlayHost />
         </View>
       </OverlayProvider>
@@ -709,231 +263,177 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F8FAFC",
   },
   scrollContent: {
-    alignItems: "center",
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: 40,
+    gap: 16,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#0F172A",
   },
-  section: {
-    width: "100%",
-    gap: 10,
-    marginTop: 16,
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
   },
-  sectionTitle: {
-    fontSize: 14,
+  cardHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  cardTitle: {
+    fontSize: 16,
     fontWeight: "700",
     color: "#111827",
-    textTransform: "uppercase",
-    letterSpacing: 1,
   },
-  actionRow: {
-    gap: 6,
+  cardBody: {
+    fontSize: 13,
+    color: "#475569",
   },
-  button: {
-    backgroundColor: "#111827",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    width: "100%",
+  row: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    flexWrap: "wrap",
   },
-  buttonText: {
-    color: "#FFFFFF",
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  toggleLabel: {
+    fontSize: 13,
+    color: "#0F172A",
     fontWeight: "600",
   },
-  helperText: {
+  outlineButton: {
+    borderWidth: 1,
+    borderColor: "#CBD5F5",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  outlineButtonText: {
+    color: "#0F172A",
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  helpIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#0F172A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  helpIconText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+  toastCard: {
+    backgroundColor: "#111827",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 4,
+  },
+  toastTitle: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  toastBody: {
+    color: "#D1D5DB",
     fontSize: 12,
-    color: "#6B7280",
   },
-  overlayContainer: {
+  bottomSheetBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(15,23,42,0.55)",
   },
-  overlayCenter: {
+  bottomSheetWrap: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  overlayBottom: {
-    flex: 1,
-    alignItems: "center",
     justifyContent: "flex-end",
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
-  overlayTop: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+  bottomSheetCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 18,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
-  modalContentContainer: {
+  bottomSheetHeader: {
+    gap: 4,
+  },
+  bottomSheetBadge: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#2563EB",
+  },
+  bottomSheetTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  bottomSheetBody: {
+    fontSize: 13,
+    color: "#475569",
+  },
+  bottomSheetList: {
+    gap: 4,
+  },
+  bottomSheetItem: {
+    fontSize: 12,
+    color: "#475569",
+  },
+  modalBackdrop: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    paddingVertical: 16,
   },
   modalCard: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 16,
     width: "100%",
     maxWidth: 360,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
     gap: 12,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "700",
+    color: "#111827",
   },
-  modalDescription: {
-    fontSize: 14,
-    color: "#374151",
+  modalBody: {
+    fontSize: 13,
+    color: "#475569",
   },
   modalActions: {
     flexDirection: "row",
-    gap: 12,
     justifyContent: "flex-end",
-  },
-  primaryButton: {
-    backgroundColor: "#111827",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    backgroundColor: "#E5E7EB",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-  },
-  secondaryButtonText: {
-    color: "#111827",
-    fontWeight: "600",
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 12,
-    minWidth: 240,
-    alignItems: "center",
     gap: 12,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  cardDescription: {
-    fontSize: 13,
-    color: "#374151",
-    textAlign: "center",
-  },
-  debugCard: {
-    width: "100%",
-    backgroundColor: "#F3F4F6",
-    borderRadius: 10,
-    padding: 10,
-    gap: 4,
-  },
-  debugTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  debugText: {
-    fontSize: 12,
-    color: "#374151",
-  },
-  customToast: {
-    backgroundColor: "#111827",
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    gap: 4,
-  },
-  customToastTitle: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-  customToastBody: {
-    color: "#D1D5DB",
-    fontSize: 12,
-  },
-  customLoader: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    gap: 6,
-    shadowColor: "#111827",
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-  },
-  customLoaderTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  customLoaderBody: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  customLoaderContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  anchorStage: {
-    width: "100%",
-    height: 160,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  anchor: {
-    position: "absolute",
-    backgroundColor: "#111827",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  anchorText: {
-    color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  anchorTopRight: {
-    top: 8,
-    right: 8,
-  },
-  anchorBottomLeft: {
-    bottom: 8,
-    left: 8,
-  },
-  anchorCenter: {
-    top: "50%",
-    left: "50%",
-    transform: [{ translateX: -24 }, { translateY: -12 }],
+  customTooltipContainer: {
+    backgroundColor: "transparent",
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    shadowOpacity: 0,
   },
   customTooltip: {
     backgroundColor: "#0F172A",
@@ -955,23 +455,14 @@ const styles = StyleSheet.create({
   customTooltipButton: {
     alignSelf: "flex-start",
     backgroundColor: "#38BDF8",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 999,
   },
   customTooltipButtonText: {
     color: "#0F172A",
     fontSize: 11,
     fontWeight: "700",
-  },
-  insetsText: {
-    fontSize: 12,
-    color: "#4B5563",
-  },
-  warningText: {
-    fontSize: 12,
-    color: "#B91C1C",
-    textAlign: "center",
   },
 });
 

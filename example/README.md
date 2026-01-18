@@ -15,8 +15,16 @@ npm install
 npx expo start
 ```
 
+## Demo coverage
+
+- Custom toast UI + queued toasts
+- Tooltip alignment and clamping near the edge
+- Bottom overlay using `safeArea+tabBar`
+- Modal + loader flow
+
 ## Verification checklist
 
-- Bottom safe-area overlay sits above the home indicator; the no-insets overlay hugs the bottom edge.
-- Top safe-area overlay does not collide with the notch/Dynamic Island.
-- Touch test: when blockTouches is true, buttons behind are not clickable; when false, they are.
+- Custom toast renders with custom UI, and queued toasts show sequentially.
+- Tooltip appears anchored to the help icon and clamps within the screen.
+- Bottom overlay sits above the simulated tab bar when enabled.
+- Modal confirm shows loader then a success toast.
