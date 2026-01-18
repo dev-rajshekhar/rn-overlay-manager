@@ -1,6 +1,6 @@
 {
   "name": "rn-overlay-manager",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Overlay manager for React Native.",
   "type": "module",
   "main": "./dist/index.cjs",
