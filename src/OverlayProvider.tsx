@@ -10,6 +10,7 @@ import type {
   TooltipOptions
 } from "./types.js";
 import { createOverlayStore } from "./store.js";
+import { warnIfNoHost } from "./devWarnings.js";
 import { ModalOverlay } from "./overlays/ModalOverlay.js";
 import { LoaderOverlay } from "./overlays/LoaderOverlay.js";
 import { TooltipOverlay } from "./overlays/TooltipOverlay.js";
@@ -21,9 +22,13 @@ export const OverlayContext = React.createContext<OverlayController | null>(
 export const OverlayItemsContext = React.createContext<OverlayItem[] | null>(
   null
 );
+export const OverlayConfigContext = React.createContext({
+  tabBarHeight: 0
+});
 
 export type OverlayProviderProps = {
   children?: React.ReactNode;
+  tabBarHeight?: number;
 };
 
 const createHelperShowOptions = <P,>(
@@ -44,10 +49,14 @@ const createHelperShowOptions = <P,>(
     insets: overrides?.insets,
     props,
     onBackPress: overrides?.onBackPress,
+    group: overrides?.group
   };
 };
 
-export const OverlayProvider = ({ children }: OverlayProviderProps) => {
+export const OverlayProvider = ({
+  children,
+  tabBarHeight = 0
+}: OverlayProviderProps) => {
   const [items, setItems] = React.useState<OverlayItem[]>([]);
   const store = React.useMemo(() => createOverlayStore(setItems), [setItems]);
   const toastQueueRef = React.useRef<(ToastOptions & { id: string })[]>([]);
@@ -55,7 +64,10 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
   const toastIdRef = React.useRef(0);
 
   const show = React.useCallback(
-    <P,>(options: OverlayShowOptions<P>) => store.show(options),
+    <P,>(options: OverlayShowOptions<P>) => {
+      warnIfNoHost();
+      return store.show(options);
+    },
     [store]
   );
 
@@ -66,8 +78,14 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
     [store]
   );
 
+  const hideGroup = React.useCallback(
+    (group: string) => store.hideGroup(group),
+    [store]
+  );
+
   const showToastNow = React.useCallback(
     (options: ToastOptions & { id: string }) => {
+      warnIfNoHost();
       const placement = options.placement ?? "bottom";
       const durationMs = options.durationMs ?? 2000;
       activeToastIdRef.current = options.id;
@@ -140,6 +158,7 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
 
   const tooltip = React.useCallback(
     (options: TooltipOptions) => {
+      warnIfNoHost();
       const dismissible = options.dismissible ?? true;
       const placement = options.placement ?? "auto";
       const type = options.type ?? "info";
@@ -170,6 +189,7 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
 
   const modal = React.useCallback(
     (options: ModalOptions) => {
+      warnIfNoHost();
       const dismissible = options.dismissible ?? true;
       const backdrop = options.backdrop ?? "dim";
       const insets = options.insets ?? "safeArea";
@@ -194,6 +214,7 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
 
   const loader = React.useCallback(
     (options?: LoaderOptions) => {
+      warnIfNoHost();
       return store.show({
         type: "loader",
         props: options,
@@ -214,15 +235,17 @@ export const OverlayProvider = ({ children }: OverlayProviderProps) => {
   );
 
   const controller = React.useMemo<OverlayController>(
-    () => ({ show, hide, hideAll, toast, tooltip, modal, loader }),
-    [show, hide, hideAll, toast, tooltip, modal, loader]
+    () => ({ show, hide, hideAll, hideGroup, toast, tooltip, modal, loader }),
+    [show, hide, hideAll, hideGroup, toast, tooltip, modal, loader]
   );
 
   return (
     <OverlayContext.Provider value={controller}>
-      <OverlayItemsContext.Provider value={items}>
-        {children}
-      </OverlayItemsContext.Provider>
+      <OverlayConfigContext.Provider value={{ tabBarHeight }}>
+        <OverlayItemsContext.Provider value={items}>
+          {children}
+        </OverlayItemsContext.Provider>
+      </OverlayConfigContext.Provider>
     </OverlayContext.Provider>
   );
 };
