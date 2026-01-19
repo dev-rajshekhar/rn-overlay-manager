@@ -36,6 +36,14 @@
     "ui"
   ],
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-rajshekhar/rn-overlay-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dev-rajshekhar/rn-overlay-manager/issues"
+  },
+  "homepage": "https://github.com/dev-rajshekhar/rn-overlay-manager#readme",
   "license": "MIT",
   "devDependencies": {
     "@types/react": "^19.2.8",
