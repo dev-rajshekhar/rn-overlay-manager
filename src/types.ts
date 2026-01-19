@@ -59,6 +59,9 @@ export type OverlayItem<P = unknown> = {
   /** Insets strategy (optional) */
   insets?: InsetsMode;
 
+  /** Shift overlay upward when keyboard is visible */
+  avoidKeyboard?: boolean;
+
   /** Arbitrary user props for render function */
   props: P;
 
@@ -115,6 +118,7 @@ export type TooltipOptions = {
     text?: StyleProp<TextStyle>;
   };
   render?: (api: OverlayRenderApi, data: TooltipOptions) => React.ReactNode;
+  avoidKeyboard?: boolean;
 };
 
 /** Convenience modal options */
@@ -122,6 +126,7 @@ export type ModalOptions = {
   dismissible?: boolean;
   backdrop?: "transparent" | "dim";
   insets?: InsetsMode;
+  avoidKeyboard?: boolean;
   render: (api: OverlayRenderApi) => React.ReactNode;
 };
 

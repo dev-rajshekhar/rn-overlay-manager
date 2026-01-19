@@ -47,6 +47,7 @@ const createHelperShowOptions = <P,>(
     backdrop: overrides?.backdrop,
     placement: overrides?.placement,
     insets: overrides?.insets,
+    avoidKeyboard: overrides?.avoidKeyboard,
     props,
     onBackPress: overrides?.onBackPress,
     group: overrides?.group
@@ -181,7 +182,8 @@ export const OverlayProvider = ({
         dismissible,
         blockTouches: false,
         backdrop: "transparent",
-        insets: "none"
+        insets: "none",
+        avoidKeyboard: options.avoidKeyboard
       });
     },
     [store]
@@ -206,7 +208,8 @@ export const OverlayProvider = ({
         dismissible,
         blockTouches: true,
         backdrop,
-        insets
+        insets,
+        avoidKeyboard: options.avoidKeyboard
       });
     },
     [store]

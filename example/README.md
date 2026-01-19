@@ -29,3 +29,4 @@ npx expo start
 - Bottom overlay sits above the simulated tab bar when enabled.
 - Modal confirm shows loader then a success toast.
 - Rotate the device or resize the window to verify tooltip repositioning.
+- Keyboard modal shifts upward when the keyboard is visible.
