@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0
+- Tooltip robustness improvements (measurement, clamping, rotation handling)
+- Tooltip pointer triangle updates and alignment fixes
+- Keyboard avoidance support (`avoidKeyboard`)
+- Example app redesigned with focused demos + keyboard modal
+- Public API docs expanded (TSDoc comments)
+
 ## 0.2.0
 - Dev warnings for missing/multiple OverlayHost and invalid tooltip anchorRef
 - Overlay groups with `group` + `hideGroup(group)`
