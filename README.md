@@ -147,6 +147,7 @@ overlay.hide(id);
 | `dismissible` | `boolean` | `true` | Back button / backdrop dismissal. |
 | `backdrop` | `"transparent" \| "dim"` | `"dim"` | Backdrop appearance. |
 | `insets` | `"safeArea" \| "none" \| {...}` | `"safeArea"` | Container padding strategy. |
+| `avoidKeyboard` | `boolean` | `false` | Shift upward when keyboard appears. |
 
 ### loader(options)
 
@@ -171,6 +172,7 @@ overlay.hide(id);
 | `styles.container` | `ViewStyle` | — | Container override. |
 | `styles.text` | `TextStyle` | — | Text override. |
 | `render` | `(api, options) => ReactNode` | — | Full custom renderer. |
+| `avoidKeyboard` | `boolean` | `false` | Shift upward when keyboard appears. |
 
 ### show(options)
 
@@ -184,6 +186,7 @@ overlay.hide(id);
 | `backdrop` | `"none" \| "transparent" \| "dim"` | Backdrop appearance. |
 | `priority` | `number` | Higher value renders above lower. |
 | `insets` | `"safeArea" \| "none" \| {...}` | Insets strategy. |
+| `avoidKeyboard` | `boolean` | Shift upward when keyboard appears. |
 
 ### OverlayProvider props
 
@@ -206,6 +209,10 @@ cd example && npm i && npx expo start
 ## Safe-area note
 
 Insets read from `react-native-safe-area-context` when available. If it is not installed or not provided, insets default to zero. Use `tabBarHeight` when using `insets="safeArea+tabBar"`.
+
+## Keyboard avoidance
+
+`avoidKeyboard` provides a minimal upward shift when the keyboard is visible. It is not a full scroll-to-input solution.
 
 ## License
 

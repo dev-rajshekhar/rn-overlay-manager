@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -122,6 +123,7 @@ const DemoScreen = ({
     overlay.modal({
       dismissible: true,
       backdrop: "dim",
+      avoidKeyboard: false,
       render: (api) => (
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
@@ -135,6 +137,34 @@ const DemoScreen = ({
               </Pressable>
               <Pressable style={styles.outlineButton} onPress={api.hide}>
                 <Text style={styles.outlineButtonText}>Confirm</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      ),
+    });
+  };
+
+  const showKeyboardModal = () => {
+    overlay.modal({
+      dismissible: true,
+      backdrop: "dim",
+      avoidKeyboard: true,
+      render: (api) => (
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Edit name</Text>
+            <Text style={styles.modalBody}>
+              This modal shifts up when the keyboard appears.
+            </Text>
+            <TextInput
+              placeholder="Full name"
+              style={styles.input}
+              placeholderTextColor="#94A3B8"
+            />
+            <View style={styles.modalActions}>
+              <Pressable style={styles.outlineButton} onPress={api.hide}>
+                <Text style={styles.outlineButtonText}>Close</Text>
               </Pressable>
             </View>
           </View>
@@ -228,6 +258,9 @@ const DemoScreen = ({
           <View style={styles.row}>
             <Pressable style={styles.outlineButton} onPress={showModal}>
               <Text style={styles.outlineButtonText}>Open modal</Text>
+            </Pressable>
+            <Pressable style={styles.outlineButton} onPress={showKeyboardModal}>
+              <Text style={styles.outlineButtonText}>Keyboard modal</Text>
             </Pressable>
             <Pressable style={styles.outlineButton} onPress={showLoader}>
               <Text style={styles.outlineButtonText}>Show loader</Text>
@@ -431,6 +464,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: "#0F172A",
   },
   customTooltipContainer: {
     backgroundColor: "transparent",

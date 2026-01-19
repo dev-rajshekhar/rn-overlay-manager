@@ -2,6 +2,7 @@ import * as React from "react";
 import { BackHandler, View } from "react-native";
 import type { Insets, InsetsMode, OverlayItem, OverlayRenderApi } from "./types.js";
 import { useOptionalSafeAreaInsets } from "./insets.js";
+import { useKeyboardHeight } from "./keyboard.js";
 import { registerHost, unregisterHost } from "./devWarnings.js";
 import {
   OverlayConfigContext,
@@ -15,17 +16,10 @@ const sortByPriority = (items: OverlayItem[]): OverlayItem[] => {
     .sort((a, b) => b.priority - a.priority || a.createdAt - b.createdAt);
 };
 
-export const OverlayHost = () => {
+const OverlayWrapper = React.memo(({ item, keyboardHeight }: { item: OverlayItem, keyboardHeight: number }) => {
   const controller = React.useContext(OverlayContext);
-  const items = React.useContext(OverlayItemsContext);
   const config = React.useContext(OverlayConfigContext);
   const safeAreaInsets = useOptionalSafeAreaInsets();
-
-  if (!controller || !items) {
-    throw new Error("OverlayHost must be used within OverlayProvider");
-  }
-
-  const orderedItems = React.useMemo(() => sortByPriority(items), [items]);
 
   const resolveInsets = React.useCallback(
     (mode: InsetsMode | undefined): Insets => {
@@ -52,6 +46,47 @@ export const OverlayHost = () => {
     },
     [config?.tabBarHeight, safeAreaInsets]
   );
+
+  const insets = resolveInsets(item.insets);
+  const keyboardOffset =
+    item.avoidKeyboard && keyboardHeight > 0 ? keyboardHeight : 0;
+
+  const api: OverlayRenderApi = React.useMemo(() => ({
+    id: item.id,
+    hide: () => controller?.hide(item.id),
+    insets
+  }), [item.id, controller, insets]);
+
+  return (
+    <View
+      pointerEvents={item.blockTouches ? "auto" : "box-none"}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom + keyboardOffset,
+        paddingLeft: insets.left,
+        paddingRight: insets.right
+      }}
+    >
+      {item.render(api, item.props)}
+    </View>
+  );
+});
+
+export const OverlayHost = () => {
+  const controller = React.useContext(OverlayContext);
+  const items = React.useContext(OverlayItemsContext);
+  const keyboardHeight = useKeyboardHeight();
+
+  if (!controller || !items) {
+    throw new Error("OverlayHost must be used within OverlayProvider");
+  }
+
+  const orderedItems = React.useMemo(() => sortByPriority(items), [items]);
 
   React.useEffect(() => {
     registerHost();
@@ -90,34 +125,9 @@ export const OverlayHost = () => {
 
   return (
     <>
-      {orderedItems.map((item) => {
-        const insets = resolveInsets(item.insets);
-        const api: OverlayRenderApi = {
-          id: item.id,
-          hide: () => controller.hide(item.id),
-          insets
-        };
-
-        return (
-          <View
-            key={item.id}
-            pointerEvents={item.blockTouches ? "auto" : "box-none"}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              paddingTop: insets.top,
-              paddingBottom: insets.bottom,
-              paddingLeft: insets.left,
-              paddingRight: insets.right
-            }}
-          >
-            {item.render(api, item.props)}
-          </View>
-        );
-      })}
+      {orderedItems.map((item) => (
+        <OverlayWrapper key={item.id} item={item} keyboardHeight={keyboardHeight} />
+      ))}
     </>
   );
 };
