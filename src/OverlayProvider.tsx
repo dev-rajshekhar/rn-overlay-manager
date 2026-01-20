@@ -15,6 +15,8 @@ import { ModalOverlay } from "./overlays/ModalOverlay.js";
 import { LoaderOverlay } from "./overlays/LoaderOverlay.js";
 import { TooltipOverlay } from "./overlays/TooltipOverlay.js";
 import { ToastOverlay } from "./overlays/ToastOverlay.js";
+import { NavigationOverlayContext } from "./navigation/context.js";
+import { warnScreenScopeWithoutNavigation } from "./devWarnings.js";
 
 export const OverlayContext = React.createContext<OverlayController | null>(
   null
@@ -48,6 +50,7 @@ const createHelperShowOptions = <P,>(
     placement: overrides?.placement,
     insets: overrides?.insets,
     avoidKeyboard: overrides?.avoidKeyboard,
+    scope: overrides?.scope,
     props,
     onBackPress: overrides?.onBackPress,
     group: overrides?.group
@@ -59,17 +62,27 @@ export const OverlayProvider = ({
   tabBarHeight = 0
 }: OverlayProviderProps) => {
   const [items, setItems] = React.useState<OverlayItem[]>([]);
+  const navigationContext = React.useContext(NavigationOverlayContext);
   const store = React.useMemo(() => createOverlayStore(setItems), [setItems]);
   const toastQueueRef = React.useRef<(ToastOptions & { id: string })[]>([]);
   const activeToastIdRef = React.useRef<string | null>(null);
   const toastIdRef = React.useRef(0);
+  const routeKey = navigationContext?.routeKey ?? null;
 
   const show = React.useCallback(
     <P,>(options: OverlayShowOptions<P>) => {
       warnIfNoHost();
-      return store.show(options);
+      const scope = options.scope ?? "global";
+      if (scope === "screen" && !routeKey) {
+        warnScreenScopeWithoutNavigation();
+      }
+      return store.show({
+        ...options,
+        scope: scope === "screen" && !routeKey ? "global" : scope,
+        routeKey: scope === "screen" ? routeKey ?? undefined : undefined
+      });
     },
-    [store]
+    [routeKey, store]
   );
 
   const hide = React.useCallback((id: string) => store.hide(id), [store]);
@@ -163,6 +176,10 @@ export const OverlayProvider = ({
       const dismissible = options.dismissible ?? true;
       const placement = options.placement ?? "auto";
       const type = options.type ?? "info";
+      const scope = options.scope ?? "global";
+      if (scope === "screen" && !routeKey) {
+        warnScreenScopeWithoutNavigation();
+      }
 
       return store.show({
         type: "tooltip",
@@ -183,10 +200,12 @@ export const OverlayProvider = ({
         blockTouches: false,
         backdrop: "transparent",
         insets: "none",
-        avoidKeyboard: options.avoidKeyboard
+        avoidKeyboard: options.avoidKeyboard,
+        scope: scope === "screen" && !routeKey ? "global" : scope,
+        routeKey: scope === "screen" ? routeKey ?? undefined : undefined
       });
     },
-    [store]
+    [routeKey, store]
   );
 
   const modal = React.useCallback(
@@ -195,6 +214,10 @@ export const OverlayProvider = ({
       const dismissible = options.dismissible ?? true;
       const backdrop = options.backdrop ?? "dim";
       const insets = options.insets ?? "safeArea";
+      const scope = options.scope ?? "global";
+      if (scope === "screen" && !routeKey) {
+        warnScreenScopeWithoutNavigation();
+      }
 
       return store.show({
         type: "modal",
@@ -209,10 +232,12 @@ export const OverlayProvider = ({
         blockTouches: true,
         backdrop,
         insets,
-        avoidKeyboard: options.avoidKeyboard
+        avoidKeyboard: options.avoidKeyboard,
+        scope: scope === "screen" && !routeKey ? "global" : scope,
+        routeKey: scope === "screen" ? routeKey ?? undefined : undefined
       });
     },
-    [store]
+    [routeKey, store]
   );
 
   const loader = React.useCallback(
@@ -236,6 +261,13 @@ export const OverlayProvider = ({
     },
     [store]
   );
+
+  React.useEffect(() => {
+    if (!routeKey) {
+      return;
+    }
+    store.hideScreenScopedExcept(routeKey);
+  }, [routeKey, store]);
 
   const controller = React.useMemo<OverlayController>(
     () => ({ show, hide, hideAll, hideGroup, toast, tooltip, modal, loader }),

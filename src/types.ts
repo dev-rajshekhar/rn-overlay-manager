@@ -43,6 +43,10 @@ export type OverlayItem<P = unknown> = {
   createdAt: number;
   /** Optional group name (used by hideGroup). */
   group?: string;
+  /** Scope for automatic cleanup when navigation changes. */
+  scope?: "global" | "screen";
+  /** Internal route key for screen-scoped overlays. */
+  routeKey?: string;
 
   /** Higher priority renders above lower priority. */
   priority: number;
@@ -134,6 +138,8 @@ export type TooltipOptions = {
   render?: (api: OverlayRenderApi, data: TooltipOptions) => React.ReactNode;
   /** Shift tooltip upward when keyboard is visible (opt-in). */
   avoidKeyboard?: boolean;
+  /** Scope for automatic cleanup when navigation changes. */
+  scope?: "global" | "screen";
 };
 
 /** Convenience modal options */
@@ -148,6 +154,8 @@ export type ModalOptions = {
   avoidKeyboard?: boolean;
   /** Render modal content. */
   render: (api: OverlayRenderApi) => React.ReactNode;
+  /** Scope for automatic cleanup when navigation changes. */
+  scope?: "global" | "screen";
 };
 
 /** Convenience loader options */

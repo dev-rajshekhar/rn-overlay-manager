@@ -63,7 +63,7 @@ export default function App() {
 Notes:
 - Mount the host once near the root.
 - Overlays are global by default.
-- Scope support is planned for a future release.
+- Use `scope: "screen"` to auto-clear overlays when the route changes (requires NavigationOverlayProvider).
 
 ## Usage
 
