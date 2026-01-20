@@ -68,6 +68,8 @@ export const OverlayProvider = ({
   const activeToastIdRef = React.useRef<string | null>(null);
   const toastIdRef = React.useRef(0);
   const routeKey = navigationContext?.routeKey ?? null;
+  const resolvedTabBarHeight =
+    navigationContext?.tabBarHeight ?? tabBarHeight ?? 0;
 
   const show = React.useCallback(
     <P,>(options: OverlayShowOptions<P>) => {
@@ -276,7 +278,7 @@ export const OverlayProvider = ({
 
   return (
     <OverlayContext.Provider value={controller}>
-      <OverlayConfigContext.Provider value={{ tabBarHeight }}>
+      <OverlayConfigContext.Provider value={{ tabBarHeight: resolvedTabBarHeight }}>
         <OverlayItemsContext.Provider value={items}>
           {children}
         </OverlayItemsContext.Provider>

@@ -19,3 +19,4 @@ export { useOverlay } from "./useOverlay.js";
 export { OverlayHost } from "./OverlayHost.js";
 export { NavigationOverlayProvider } from "./navigation/NavigationOverlayProvider.js";
 export { NavigationOverlayHost } from "./navigation/NavigationOverlayHost.js";
+export { useNavigationOverlayConfig } from "./navigation/useNavigationOverlayConfig.js";

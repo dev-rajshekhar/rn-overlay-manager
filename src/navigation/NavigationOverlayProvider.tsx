@@ -13,15 +13,23 @@ export type NavigationOverlayProviderProps = OverlayProviderProps & {
   navigationRef?: React.RefObject<NavigationContainerRefLike | null>;
   /** Optional handler for navigation state changes */
   onStateChange?: () => void;
+  /** Optional tab bar height override */
+  tabBarHeight?: number;
 };
 
 export const NavigationOverlayProvider = ({
   children,
   navigationRef,
   onStateChange,
+  tabBarHeight,
   ...providerProps
 }: NavigationOverlayProviderProps) => {
   const [routeKey, setRouteKey] = React.useState<string | null>(null);
+  const [internalTabBarHeight, setInternalTabBarHeight] = React.useState(0);
+
+  const setTabBarHeight = React.useCallback((height: number) => {
+    setInternalTabBarHeight(height);
+  }, []);
 
   const updateRouteKey = React.useCallback(() => {
     const route = navigationRef?.current?.getCurrentRoute?.();
@@ -48,8 +56,19 @@ export const NavigationOverlayProvider = ({
   }, [updateRouteKey]);
 
   return (
-    <NavigationOverlayContext.Provider value={{ routeKey }}>
-      <OverlayProvider {...providerProps}>{children}</OverlayProvider>
+    <NavigationOverlayContext.Provider
+      value={{
+        routeKey,
+        tabBarHeight: tabBarHeight ?? internalTabBarHeight,
+        setTabBarHeight
+      }}
+    >
+      <OverlayProvider
+        {...providerProps}
+        tabBarHeight={tabBarHeight ?? internalTabBarHeight}
+      >
+        {children}
+      </OverlayProvider>
     </NavigationOverlayContext.Provider>
   );
 };

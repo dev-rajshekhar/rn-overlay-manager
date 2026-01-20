@@ -41,18 +41,30 @@ export default function App() {
 ```tsx
 import {
   NavigationOverlayProvider,
-  NavigationOverlayHost
+  NavigationOverlayHost,
+  useNavigationOverlayConfig
 } from "rn-overlay-manager";
 import { NavigationContainer } from "@react-navigation/native";
 import { useNavigationContainerRef } from "@react-navigation/native";
+
+const TabBarHeightBridge = () => {
+  const { setTabBarHeight } = useNavigationOverlayConfig();
+
+  React.useEffect(() => {
+    setTabBarHeight(60);
+  }, [setTabBarHeight]);
+
+  return null;
+};
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
 
   return (
-    <NavigationOverlayProvider navigationRef={navigationRef}>
+    <NavigationOverlayProvider navigationRef={navigationRef} tabBarHeight={60}>
       <NavigationContainer ref={navigationRef}>
         <RootNavigator />
+        <TabBarHeightBridge />
       </NavigationContainer>
       <NavigationOverlayHost />
     </NavigationOverlayProvider>
@@ -64,6 +76,7 @@ Notes:
 - Mount the host once near the root.
 - Overlays are global by default.
 - Use `scope: "screen"` to auto-clear overlays when the route changes (requires NavigationOverlayProvider).
+- `tabBarHeight` can be passed directly or updated via `useNavigationOverlayConfig`.
 
 ## Usage
 
