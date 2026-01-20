@@ -36,6 +36,35 @@ export default function App() {
 }
 ```
 
+## Using with React Navigation
+
+```tsx
+import {
+  NavigationOverlayProvider,
+  NavigationOverlayHost
+} from "rn-overlay-manager";
+import { NavigationContainer } from "@react-navigation/native";
+import { useNavigationContainerRef } from "@react-navigation/native";
+
+export default function App() {
+  const navigationRef = useNavigationContainerRef();
+
+  return (
+    <NavigationOverlayProvider navigationRef={navigationRef}>
+      <NavigationContainer ref={navigationRef}>
+        <RootNavigator />
+      </NavigationContainer>
+      <NavigationOverlayHost />
+    </NavigationOverlayProvider>
+  );
+}
+```
+
+Notes:
+- Mount the host once near the root.
+- Overlays are global by default.
+- Scope support is planned for a future release.
+
 ## Usage
 
 ## Demo

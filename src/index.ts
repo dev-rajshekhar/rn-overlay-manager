@@ -17,3 +17,5 @@ export type {
 export { OverlayProvider } from "./OverlayProvider.js";
 export { useOverlay } from "./useOverlay.js";
 export { OverlayHost } from "./OverlayHost.js";
+export { NavigationOverlayProvider } from "./navigation/NavigationOverlayProvider.js";
+export { NavigationOverlayHost } from "./navigation/NavigationOverlayHost.js";

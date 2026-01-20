@@ -21,6 +21,25 @@ npx expo start
 - Tooltip alignment and clamping near the edge
 - Bottom overlay using `safeArea+tabBar`
 - Modal + loader flow
+- Navigation usage (commented example, optional)
+
+```tsx
+// import {
+//   NavigationOverlayProvider,
+//   NavigationOverlayHost
+// } from "rn-overlay-manager";
+// import { NavigationContainer } from "@react-navigation/native";
+// import { useNavigationContainerRef } from "@react-navigation/native";
+//
+// const navigationRef = useNavigationContainerRef();
+//
+// <NavigationOverlayProvider navigationRef={navigationRef}>
+//   <NavigationContainer ref={navigationRef}>
+//     <RootNavigator />
+//   </NavigationContainer>
+//   <NavigationOverlayHost />
+// </NavigationOverlayProvider>
+```
 
 ## Verification checklist
 
