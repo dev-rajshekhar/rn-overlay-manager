@@ -54,3 +54,10 @@ export const warnScreenScopeWithoutNavigation = () => {
     "[rn-overlay-manager] scope=\"screen\" requires NavigationOverlayProvider; falling back to global scope."
   );
 };
+
+export const warnInvalidAnimation = (animation: string) => {
+  warnOnce(
+    `invalid-animation-${animation}`,
+    `[rn-overlay-manager] Invalid animation "${animation}". Falling back to "none".`
+  );
+};

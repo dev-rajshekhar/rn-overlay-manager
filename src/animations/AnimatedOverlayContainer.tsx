@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Animated, Easing, type ViewStyle } from "react-native";
+import { Animated, Easing, View, type ViewStyle } from "react-native";
 import type { OverlayAnimation, OverlayAnimationEasing } from "../types.js";
+import { warnInvalidAnimation } from "../devWarnings.js";
 
 type AnimatedOverlayContainerProps = {
   visible: boolean;
@@ -9,6 +10,8 @@ type AnimatedOverlayContainerProps = {
   easing?: OverlayAnimationEasing;
   onExited?: () => void;
   style?: ViewStyle;
+  stackIndex?: number;
+  stackSize?: number;
   children: React.ReactNode;
 };
 
@@ -26,6 +29,16 @@ const getHiddenValues = (animation: OverlayAnimation) => {
     default:
       return { opacity: 1, scale: 1, translateY: 0 };
   }
+};
+
+const isValidAnimation = (animation: string): animation is OverlayAnimation => {
+  return (
+    animation === "none" ||
+    animation === "fade" ||
+    animation === "scale" ||
+    animation === "slide-up" ||
+    animation === "slide-down"
+  );
 };
 
 const getVisibleValues = () => ({
@@ -48,21 +61,48 @@ export const AnimatedOverlayContainer = ({
   easing = "default",
   onExited,
   style,
+  stackIndex,
+  stackSize,
   children
 }: AnimatedOverlayContainerProps) => {
   const opacity = React.useRef(new Animated.Value(1)).current;
   const scale = React.useRef(new Animated.Value(1)).current;
   const translateY = React.useRef(new Animated.Value(0)).current;
   const animationRef = React.useRef<Animated.CompositeAnimation | null>(null);
+  const prevVisibleRef = React.useRef<boolean | null>(null);
+
+  const resolvedAnimation = React.useMemo<OverlayAnimation>(() => {
+    if (isValidAnimation(animation)) {
+      return animation;
+    }
+    if (typeof animation === "string") {
+      warnInvalidAnimation(animation);
+    }
+    return "none";
+  }, [animation]);
+
+  const isTop =
+    typeof stackIndex === "number" && typeof stackSize === "number"
+      ? stackIndex === 0
+      : true;
+  const hasStack = typeof stackSize === "number" ? stackSize > 1 : false;
+  const baseOpacity = !isTop && hasStack ? 0.9 : 1;
+  const baseScale = !isTop && hasStack ? 0.98 : 1;
 
   React.useEffect(() => {
-    const hidden = getHiddenValues(animation);
+    const hidden = getHiddenValues(resolvedAnimation);
     const visibleValues = getVisibleValues();
     const easingFn = resolveEasing(easing);
 
+    const prevVisible = prevVisibleRef.current;
+    if (prevVisible === visible) {
+      return;
+    }
+    prevVisibleRef.current = visible;
+
     animationRef.current?.stop();
 
-    if (animation === "none") {
+    if (resolvedAnimation === "none") {
       if (!visible) {
         onExited?.();
       } else {
@@ -77,25 +117,25 @@ export const AnimatedOverlayContainer = ({
       opacity.setValue(hidden.opacity);
       scale.setValue(hidden.scale);
       translateY.setValue(hidden.translateY);
-      animationRef.current = Animated.timing(opacity, {
+      const enterOpacity = Animated.timing(opacity, {
         toValue: visibleValues.opacity,
         duration: durationMs,
         easing: easingFn,
         useNativeDriver: true
       });
-      const scaleAnim = Animated.timing(scale, {
+      const enterScale = Animated.timing(scale, {
         toValue: visibleValues.scale,
         duration: durationMs,
         easing: easingFn,
         useNativeDriver: true
       });
-      const translateAnim = Animated.timing(translateY, {
+      const enterTranslate = Animated.timing(translateY, {
         toValue: visibleValues.translateY,
         duration: durationMs,
         easing: easingFn,
         useNativeDriver: true
       });
-      Animated.parallel([animationRef.current, scaleAnim, translateAnim]).start();
+      Animated.parallel([enterOpacity, enterScale, enterTranslate]).start();
       return;
     }
 
@@ -121,16 +161,38 @@ export const AnimatedOverlayContainer = ({
     Animated.parallel([exitOpacity, exitScale, exitTranslate]).start(() => {
       onExited?.();
     });
-  }, [animation, durationMs, easing, onExited, opacity, scale, translateY, visible]);
+  }, [
+    durationMs,
+    easing,
+    onExited,
+    opacity,
+    scale,
+    translateY,
+    resolvedAnimation,
+    visible
+  ]);
 
-  if (animation === "none" && !visible) {
-    return null;
+  if (resolvedAnimation === "none") {
+    if (!visible) {
+      return null;
+    }
+    if (baseOpacity !== 1 || baseScale !== 1) {
+      return (
+        <View style={[{ opacity: baseOpacity, transform: [{ scale: baseScale }] }, style]}>
+          {children}
+        </View>
+      );
+    }
+    return <>{children}</>;
   }
 
-  const containerStyle: ViewStyle = {
-    opacity,
-    transform: [{ translateY }, { scale }]
-  } as unknown as ViewStyle;
+  const containerStyle = {
+    opacity: Animated.multiply(opacity, baseOpacity),
+    transform: [
+      { translateY },
+      { scale: Animated.multiply(scale, baseScale) }
+    ]
+  };
 
   return (
     <Animated.View style={[containerStyle, style]}>

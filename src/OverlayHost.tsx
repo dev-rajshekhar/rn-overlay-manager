@@ -22,11 +22,15 @@ const OverlayWrapper = React.memo(
     item,
     keyboardHeight,
     visible,
+    stackIndex,
+    stackSize,
     onExited
   }: {
     item: OverlayItem;
     keyboardHeight: number;
     visible: boolean;
+    stackIndex?: number;
+    stackSize?: number;
     onExited?: () => void;
   }) => {
   const controller = React.useContext(OverlayContext);
@@ -75,6 +79,8 @@ const OverlayWrapper = React.memo(
       animation={item.animation}
       durationMs={item.animationDurationMs}
       easing={item.animationEasing}
+      stackIndex={stackIndex}
+      stackSize={stackSize}
       onExited={onExited}
     >
       <View
@@ -130,9 +136,13 @@ export const OverlayHost = () => {
         const animatePresence = previous.item.animatePresence ?? true;
         if (!animatePresence || animation === "none") {
           delete next[id];
-        } else {
-          next[id] = { item: previous.item, visible: false };
+          return;
         }
+        if (previous.visible) {
+          next[id] = { item: previous.item, visible: false };
+          return;
+        }
+        next[id] = previous;
       });
 
       return next;
@@ -182,7 +192,7 @@ export const OverlayHost = () => {
 
   return (
     <>
-      {orderedItems.map((item) => {
+      {orderedItems.map((item, index) => {
         const entry = presentItems[item.id];
         if (!entry) {
           return null;
@@ -193,6 +203,8 @@ export const OverlayHost = () => {
             item={entry.item}
             keyboardHeight={keyboardHeight}
             visible={entry.visible}
+            stackIndex={index}
+            stackSize={orderedItems.length}
             onExited={() => {
               setPresentItems((prev) => {
                 const next = { ...prev };
