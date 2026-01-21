@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0
+- React Navigation adapter (NavigationOverlayProvider / NavigationOverlayHost)
+- Overlay scope support: `global` vs `screen`
+- Screen-scoped overlays auto-clear on navigation change
+- `safeArea+tabBar` integration via navigation adapter
+- Navigation-based example app demonstrating real flows
+
 ## 0.3.0
 - Tooltip robustness improvements (measurement, clamping, rotation handling)
 - Tooltip pointer triangle updates and alignment fixes
