@@ -4,6 +4,7 @@ import type { Insets, InsetsMode, OverlayItem, OverlayRenderApi } from "./types.
 import { useOptionalSafeAreaInsets } from "./insets.js";
 import { useKeyboardHeight } from "./keyboard.js";
 import { registerHost, unregisterHost } from "./devWarnings.js";
+import { AnimatedOverlayContainer } from "./animations/AnimatedOverlayContainer.js";
 import {
   OverlayConfigContext,
   OverlayContext,
@@ -16,7 +17,18 @@ const sortByPriority = (items: OverlayItem[]): OverlayItem[] => {
     .sort((a, b) => b.priority - a.priority || a.createdAt - b.createdAt);
 };
 
-const OverlayWrapper = React.memo(({ item, keyboardHeight }: { item: OverlayItem, keyboardHeight: number }) => {
+const OverlayWrapper = React.memo(
+  ({
+    item,
+    keyboardHeight,
+    visible,
+    onExited
+  }: {
+    item: OverlayItem;
+    keyboardHeight: number;
+    visible: boolean;
+    onExited?: () => void;
+  }) => {
   const controller = React.useContext(OverlayContext);
   const config = React.useContext(OverlayConfigContext);
   const safeAreaInsets = useOptionalSafeAreaInsets();
@@ -58,22 +70,30 @@ const OverlayWrapper = React.memo(({ item, keyboardHeight }: { item: OverlayItem
   }), [item.id, controller, insets]);
 
   return (
-    <View
-      pointerEvents={item.blockTouches ? "auto" : "box-none"}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom + keyboardOffset,
-        paddingLeft: insets.left,
-        paddingRight: insets.right
-      }}
+    <AnimatedOverlayContainer
+      visible={visible}
+      animation={item.animation}
+      durationMs={item.animationDurationMs}
+      easing={item.animationEasing}
+      onExited={onExited}
     >
-      {item.render(api, item.props)}
-    </View>
+      <View
+        pointerEvents={item.blockTouches ? "auto" : "box-none"}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom + keyboardOffset,
+          paddingLeft: insets.left,
+          paddingRight: insets.right
+        }}
+      >
+        {item.render(api, item.props)}
+      </View>
+    </AnimatedOverlayContainer>
   );
 });
 
@@ -86,7 +106,44 @@ export const OverlayHost = () => {
     throw new Error("OverlayHost must be used within OverlayProvider");
   }
 
-  const orderedItems = React.useMemo(() => sortByPriority(items), [items]);
+  const [presentItems, setPresentItems] = React.useState<
+    Record<string, { item: OverlayItem; visible: boolean }>
+  >({});
+
+  React.useEffect(() => {
+    setPresentItems((prev) => {
+      const next: Record<string, { item: OverlayItem; visible: boolean }> = {
+        ...prev
+      };
+      const activeIds = new Set(items.map((item) => item.id));
+
+      items.forEach((item) => {
+        next[item.id] = { item, visible: true };
+      });
+
+      Object.keys(prev).forEach((id) => {
+        if (activeIds.has(id)) {
+          return;
+        }
+        const previous = prev[id];
+        const animation = previous.item.animation ?? "none";
+        const animatePresence = previous.item.animatePresence ?? true;
+        if (!animatePresence || animation === "none") {
+          delete next[id];
+        } else {
+          next[id] = { item: previous.item, visible: false };
+        }
+      });
+
+      return next;
+    });
+  }, [items]);
+
+  const activeOrderedItems = React.useMemo(() => sortByPriority(items), [items]);
+  const orderedItems = React.useMemo(() => {
+    const list = Object.values(presentItems).map((entry) => entry.item);
+    return sortByPriority(list);
+  }, [presentItems]);
 
   React.useEffect(() => {
     registerHost();
@@ -94,15 +151,15 @@ export const OverlayHost = () => {
   }, []);
 
   React.useEffect(() => {
-    if (orderedItems.length === 0) {
+    if (activeOrderedItems.length === 0) {
       return;
     }
 
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
-        for (let i = orderedItems.length - 1; i >= 0; i -= 1) {
-          const item = orderedItems[i];
+        for (let i = activeOrderedItems.length - 1; i >= 0; i -= 1) {
+          const item = activeOrderedItems[i];
 
           if (item.onBackPress && item.onBackPress()) {
             return true;
@@ -121,13 +178,31 @@ export const OverlayHost = () => {
     return () => {
       subscription.remove();
     };
-  }, [controller, orderedItems]);
+  }, [controller, activeOrderedItems]);
 
   return (
     <>
-      {orderedItems.map((item) => (
-        <OverlayWrapper key={item.id} item={item} keyboardHeight={keyboardHeight} />
-      ))}
+      {orderedItems.map((item) => {
+        const entry = presentItems[item.id];
+        if (!entry) {
+          return null;
+        }
+        return (
+          <OverlayWrapper
+            key={item.id}
+            item={entry.item}
+            keyboardHeight={keyboardHeight}
+            visible={entry.visible}
+            onExited={() => {
+              setPresentItems((prev) => {
+                const next = { ...prev };
+                delete next[item.id];
+                return next;
+              });
+            }}
+          />
+        );
+      })}
     </>
   );
 };

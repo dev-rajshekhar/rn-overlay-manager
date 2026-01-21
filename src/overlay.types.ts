@@ -19,6 +19,10 @@ export interface OverlayItem {
   priority?: number;
   dismissible?: boolean;
   data?: unknown;
+  animation?: "none" | "fade" | "scale" | "slide-up" | "slide-down";
+  animationDurationMs?: number;
+  animationEasing?: "default" | "linear";
+  animatePresence?: boolean;
 }
 
 export interface OverlayShowOptions {
@@ -29,6 +33,10 @@ export interface OverlayShowOptions {
   dismissible?: boolean;
   data?: unknown;
   timeoutMs?: number;
+  animation?: "none" | "fade" | "scale" | "slide-up" | "slide-down";
+  animationDurationMs?: number;
+  animationEasing?: "default" | "linear";
+  animatePresence?: boolean;
 }
 
 export interface ToastOptions extends Omit<OverlayShowOptions, "type"> {
