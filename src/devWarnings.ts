@@ -47,3 +47,10 @@ export const warnTooltipAnchorInvalid = () => {
     "[rn-overlay-manager] Tooltip anchorRef is invalid or not measurable."
   );
 };
+
+export const warnScreenScopeWithoutNavigation = () => {
+  warnOnce(
+    "screen-scope-without-navigation",
+    "[rn-overlay-manager] scope=\"screen\" requires NavigationOverlayProvider; falling back to global scope."
+  );
+};

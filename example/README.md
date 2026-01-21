@@ -1,32 +1,52 @@
 # rn-overlay-manager example
 
-## Run
+## Setup
 
-From the repo root:
+1. Build the library (from repo root):
 
 ```sh
 npm run build
 ```
 
-From this folder:
+2. Install dependencies (from example/):
 
 ```sh
 npm install
+```
+
+3. Run:
+
+```sh
 npx expo start
 ```
 
-## Demo coverage
+## What the example shows
 
-- Custom toast UI + queued toasts
-- Tooltip alignment and clamping near the edge
-- Bottom overlay using `safeArea+tabBar`
-- Modal + loader flow
+### Tabs
+
+- **Overview**: modal, bottom modal (`safeArea+tabBar`), loader, keyboard avoidance.
+- **Toasts**: quick toast, custom toast, top toast, queued toasts.
+- **Tooltips**: edge clamping + custom render.
+
+### Navigation + scope
+
+- Overview is a stack with **Overview** + **Details**.
+- **Screen-scoped modal** should disappear when you navigate.
+- **Global toast** should persist across tabs.
 
 ## Verification checklist
 
-- Custom toast renders with custom UI, and queued toasts show sequentially.
-- Tooltip appears anchored to the help icon and clamps within the screen.
-- Bottom overlay sits above the simulated tab bar when enabled.
-- Modal confirm shows loader then a success toast.
-- Rotate the device or resize the window to verify tooltip repositioning.
-- Keyboard modal shifts upward when the keyboard is visible.
+- Show global toast, then switch tabs. It should persist until timeout.
+- Show screen modal, then navigate to Details. It should dismiss.
+- Show bottom modal and verify it sits above the tab bar (60px).
+- Open the keyboard modal and ensure the input stays visible.
+- Tap the tooltip icon near the edge; it should clamp within the screen.
+
+## React Navigation integration (used here)
+
+```tsx
+<NavigationOverlayProvider tabBarHeight={60}>
+  <NavigationContainer>...</NavigationContainer>
+  <NavigationOverlayHost />
+</NavigationOverlayProvider>
+```

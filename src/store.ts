@@ -10,6 +10,7 @@ export type OverlayStore = {
   hide: (id: string) => void;
   hideAll: (type?: OverlayType) => void;
   hideGroup: (group: string) => void;
+  hideScreenScopedExcept: (routeKey: string) => void;
 };
 
 type SetItems = Dispatch<SetStateAction<OverlayItem[]>>;
@@ -36,6 +37,8 @@ export const createOverlayStore = (setItems: SetItems): OverlayStore => {
       type: options.type,
       createdAt: Date.now(),
       group: options.group,
+      scope: options.scope ?? "global",
+      routeKey: options.routeKey,
       priority: options.priority ?? 0,
       dismissible: options.dismissible ?? true,
       blockTouches: options.blockTouches ?? false,
@@ -77,5 +80,13 @@ export const createOverlayStore = (setItems: SetItems): OverlayStore => {
     setItems((prev) => prev.filter((item) => item.group !== group));
   };
 
-  return { show, hide, hideAll, hideGroup };
+  const hideScreenScopedExcept = (routeKey: string): void => {
+    setItems((prev) =>
+      prev.filter((item) =>
+        item.scope === "screen" ? item.routeKey === routeKey : true
+      )
+    );
+  };
+
+  return { show, hide, hideAll, hideGroup, hideScreenScopedExcept };
 };
