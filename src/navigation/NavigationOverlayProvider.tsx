@@ -4,7 +4,7 @@ import { OverlayProvider } from "../OverlayProvider.js";
 import { NavigationOverlayContext } from "./context.js";
 
 export type NavigationContainerRefLike = {
-  addListener?: (event: "state", callback: () => void) => { remove: () => void };
+  addListener?: (event: "state", callback: () => void) => any;
   getCurrentRoute?: () => { key?: string; name?: string } | undefined;
 };
 
@@ -48,7 +48,13 @@ export const NavigationOverlayProvider = ({
       onStateChange?.();
     });
 
-    return () => subscription?.remove?.();
+    return () => {
+      if (typeof subscription === "function") {
+        subscription();
+      } else if (subscription?.remove) {
+        subscription.remove();
+      }
+    };
   }, [navigationRef, onStateChange, updateRouteKey]);
 
   React.useEffect(() => {

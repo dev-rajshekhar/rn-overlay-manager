@@ -40,31 +40,21 @@ export default function App() {
 
 ```tsx
 import {
+  NavigationContainer,
+  useNavigationContainerRef,
+} from "@react-navigation/native";
+import {
   NavigationOverlayProvider,
   NavigationOverlayHost,
-  useNavigationOverlayConfig
 } from "rn-overlay-manager";
-import { NavigationContainer } from "@react-navigation/native";
-import { useNavigationContainerRef } from "@react-navigation/native";
-
-const TabBarHeightBridge = () => {
-  const { setTabBarHeight } = useNavigationOverlayConfig();
-
-  React.useEffect(() => {
-    setTabBarHeight(60);
-  }, [setTabBarHeight]);
-
-  return null;
-};
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
 
   return (
-    <NavigationOverlayProvider navigationRef={navigationRef} tabBarHeight={60}>
+    <NavigationOverlayProvider navigationRef={navigationRef}>
       <NavigationContainer ref={navigationRef}>
         <RootNavigator />
-        <TabBarHeightBridge />
       </NavigationContainer>
       <NavigationOverlayHost />
     </NavigationOverlayProvider>
@@ -73,6 +63,7 @@ export default function App() {
 ```
 
 Notes:
+
 - Mount the host once near the root.
 - Overlays are global by default.
 - Use `scope: "screen"` to auto-clear overlays when the route changes (requires NavigationOverlayProvider).
@@ -92,13 +83,13 @@ const overlay = useOverlay();
 overlay.toast({ message: "Saved", placement: "bottom" });
 overlay.toast({
   message: "Queued",
-  queue: true
+  queue: true,
 });
 overlay.toast({
   message: "Styled",
   backgroundColor: "#2563EB",
   textStyle: { fontWeight: "700" },
-  toastStyle: { borderRadius: 12 }
+  toastStyle: { borderRadius: 12 },
 });
 ```
 
@@ -113,7 +104,7 @@ overlay.modal({
       <Text>Confirm?</Text>
       <Button title="Close" onPress={api.hide} />
     </View>
-  )
+  ),
 });
 ```
 
@@ -132,7 +123,7 @@ const anchorRef = React.useRef(null);
 overlay.tooltip({
   anchorRef: anchorRef as unknown as TooltipAnchorRef,
   text: "Helpful tip",
-  placement: "auto"
+  placement: "auto",
 });
 ```
 
@@ -147,7 +138,7 @@ const id = overlay.show({
   dismissible: true,
   blockTouches: true,
   backdrop: "dim",
-  priority: 10
+  priority: 10,
 });
 
 overlay.hide(id);
@@ -155,86 +146,86 @@ overlay.hide(id);
 
 ## API reference
 
-| Method | Description | Returns |
-| --- | --- | --- |
-| `toast(options)` | Show a toast notification. | `id` |
-| `modal(options)` | Show a modal with a render override. | `id` |
-| `loader(options?)` | Show a blocking loader. | `id` |
-| `tooltip(options)` | Show a tooltip anchored to a ref. | `id` |
-| `show(options)` | Show a custom overlay. | `id` |
-| `hide(id)` | Hide an overlay by id. | `void` |
-| `hideAll(type?)` | Hide all overlays, optionally by type. | `void` |
-| `hideGroup(group)` | Hide all overlays in a group. | `void` |
+| Method             | Description                            | Returns |
+| ------------------ | -------------------------------------- | ------- |
+| `toast(options)`   | Show a toast notification.             | `id`    |
+| `modal(options)`   | Show a modal with a render override.   | `id`    |
+| `loader(options?)` | Show a blocking loader.                | `id`    |
+| `tooltip(options)` | Show a tooltip anchored to a ref.      | `id`    |
+| `show(options)`    | Show a custom overlay.                 | `id`    |
+| `hide(id)`         | Hide an overlay by id.                 | `void`  |
+| `hideAll(type?)`   | Hide all overlays, optionally by type. | `void`  |
+| `hideGroup(group)` | Hide all overlays in a group.          | `void`  |
 
 ## Options by helper
 
 ### toast(options)
 
-| Option | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `message` | `string` | required | Text to display. |
-| `durationMs` | `number` | `2000` | Auto-dismiss delay. |
-| `placement` | `"top" \| "bottom"` | `"bottom"` | Position within safe area. |
-| `queue` | `boolean` | `true` | Queue when another toast is visible. |
-| `render` | `(api, options) => ReactNode` | — | Full custom renderer. |
-| `toastStyle` | `ViewStyle` | — | Built-in toast container style. |
-| `textStyle` | `TextStyle` | — | Built-in toast text style. |
-| `backgroundColor` | `string` | — | Built-in toast background. |
+| Option            | Type                          | Default    | Notes                                |
+| ----------------- | ----------------------------- | ---------- | ------------------------------------ |
+| `message`         | `string`                      | required   | Text to display.                     |
+| `durationMs`      | `number`                      | `2000`     | Auto-dismiss delay.                  |
+| `placement`       | `"top" \| "bottom"`           | `"bottom"` | Position within safe area.           |
+| `queue`           | `boolean`                     | `true`     | Queue when another toast is visible. |
+| `render`          | `(api, options) => ReactNode` | —          | Full custom renderer.                |
+| `toastStyle`      | `ViewStyle`                   | —          | Built-in toast container style.      |
+| `textStyle`       | `TextStyle`                   | —          | Built-in toast text style.           |
+| `backgroundColor` | `string`                      | —          | Built-in toast background.           |
 
 ### modal(options)
 
-| Option | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `render` | `(api) => ReactNode` | required | Render modal content. |
-| `dismissible` | `boolean` | `true` | Back button / backdrop dismissal. |
-| `backdrop` | `"transparent" \| "dim"` | `"dim"` | Backdrop appearance. |
-| `insets` | `"safeArea" \| "none" \| {...}` | `"safeArea"` | Container padding strategy. |
-| `avoidKeyboard` | `boolean` | `false` | Shift upward when keyboard appears. |
+| Option          | Type                            | Default      | Notes                               |
+| --------------- | ------------------------------- | ------------ | ----------------------------------- |
+| `render`        | `(api) => ReactNode`            | required     | Render modal content.               |
+| `dismissible`   | `boolean`                       | `true`       | Back button / backdrop dismissal.   |
+| `backdrop`      | `"transparent" \| "dim"`        | `"dim"`      | Backdrop appearance.                |
+| `insets`        | `"safeArea" \| "none" \| {...}` | `"safeArea"` | Container padding strategy.         |
+| `avoidKeyboard` | `boolean`                       | `false`      | Shift upward when keyboard appears. |
 
 ### loader(options)
 
-| Option | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `message` | `string` | — | Optional loading text. |
-| `render` | `(api) => ReactNode` | — | Full custom renderer. |
-| `styles.container` | `ViewStyle` | — | Container override. |
-| `styles.text` | `TextStyle` | — | Text override. |
-| `styles.spinner` | `ViewStyle` | — | Spinner wrap override. |
+| Option             | Type                 | Default | Notes                  |
+| ------------------ | -------------------- | ------- | ---------------------- |
+| `message`          | `string`             | —       | Optional loading text. |
+| `render`           | `(api) => ReactNode` | —       | Full custom renderer.  |
+| `styles.container` | `ViewStyle`          | —       | Container override.    |
+| `styles.text`      | `TextStyle`          | —       | Text override.         |
+| `styles.spinner`   | `ViewStyle`          | —       | Spinner wrap override. |
 
 ### tooltip(options)
 
-| Option | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `anchorRef` | `TooltipAnchorRef` | required | Ref used for positioning. |
-| `text` | `string` | — | Built-in text. |
-| `placement` | `"auto" \| "top" \| "bottom" \| "left" \| "right"` | `"auto"` | Auto picks top/bottom. |
-| `type` | `"info" \| "success" \| "warning" \| "error"` | `"info"` | Built-in color theme. |
-| `dismissible` | `boolean` | `true` | Outside press dismissal. |
-| `autoDismissMs` | `number` | — | Auto-dismiss timeout. |
-| `styles.container` | `ViewStyle` | — | Container override. |
-| `styles.text` | `TextStyle` | — | Text override. |
-| `render` | `(api, options) => ReactNode` | — | Full custom renderer. |
-| `avoidKeyboard` | `boolean` | `false` | Shift upward when keyboard appears. |
+| Option             | Type                                               | Default  | Notes                               |
+| ------------------ | -------------------------------------------------- | -------- | ----------------------------------- |
+| `anchorRef`        | `TooltipAnchorRef`                                 | required | Ref used for positioning.           |
+| `text`             | `string`                                           | —        | Built-in text.                      |
+| `placement`        | `"auto" \| "top" \| "bottom" \| "left" \| "right"` | `"auto"` | Auto picks top/bottom.              |
+| `type`             | `"info" \| "success" \| "warning" \| "error"`      | `"info"` | Built-in color theme.               |
+| `dismissible`      | `boolean`                                          | `true`   | Outside press dismissal.            |
+| `autoDismissMs`    | `number`                                           | —        | Auto-dismiss timeout.               |
+| `styles.container` | `ViewStyle`                                        | —        | Container override.                 |
+| `styles.text`      | `TextStyle`                                        | —        | Text override.                      |
+| `render`           | `(api, options) => ReactNode`                      | —        | Full custom renderer.               |
+| `avoidKeyboard`    | `boolean`                                          | `false`  | Shift upward when keyboard appears. |
 
 ### show(options)
 
-| Option | Type | Notes |
-| --- | --- | --- |
-| `type` | `OverlayType` | Used by `hideAll(type)`. |
-| `group` | `string` | Used by `hideGroup(group)`. |
-| `render` | `(api, props) => ReactNode` | Custom overlay renderer. |
-| `dismissible` | `boolean` | Back button / backdrop dismissal. |
-| `blockTouches` | `boolean` | Whether touches pass through. |
-| `backdrop` | `"none" \| "transparent" \| "dim"` | Backdrop appearance. |
-| `priority` | `number` | Higher value renders above lower. |
-| `insets` | `"safeArea" \| "none" \| {...}` | Insets strategy. |
-| `avoidKeyboard` | `boolean` | Shift upward when keyboard appears. |
+| Option          | Type                               | Notes                               |
+| --------------- | ---------------------------------- | ----------------------------------- |
+| `type`          | `OverlayType`                      | Used by `hideAll(type)`.            |
+| `group`         | `string`                           | Used by `hideGroup(group)`.         |
+| `render`        | `(api, props) => ReactNode`        | Custom overlay renderer.            |
+| `dismissible`   | `boolean`                          | Back button / backdrop dismissal.   |
+| `blockTouches`  | `boolean`                          | Whether touches pass through.       |
+| `backdrop`      | `"none" \| "transparent" \| "dim"` | Backdrop appearance.                |
+| `priority`      | `number`                           | Higher value renders above lower.   |
+| `insets`        | `"safeArea" \| "none" \| {...}`    | Insets strategy.                    |
+| `avoidKeyboard` | `boolean`                          | Shift upward when keyboard appears. |
 
 ### OverlayProvider props
 
-| Prop | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `tabBarHeight` | `number` | `0` | Used by `insets="safeArea+tabBar"`. |
+| Prop           | Type     | Default | Notes                               |
+| -------------- | -------- | ------- | ----------------------------------- |
+| `tabBarHeight` | `number` | `0`     | Used by `insets="safeArea+tabBar"`. |
 
 ## Example app
 

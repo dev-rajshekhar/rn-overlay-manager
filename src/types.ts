@@ -107,6 +107,7 @@ export type ToastOptions = {
   toastStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   backgroundColor?: string;
+  scope?: "global" | "screen";
 };
 
 /** Convenience tooltip options */
