@@ -23,6 +23,9 @@ export interface OverlayItem {
   animationDurationMs?: number;
   animationEasing?: "default" | "linear";
   animatePresence?: boolean;
+  onShow?: () => void;
+  onHide?: () => void;
+  onHidden?: () => void;
 }
 
 export interface OverlayShowOptions {
@@ -37,6 +40,9 @@ export interface OverlayShowOptions {
   animationDurationMs?: number;
   animationEasing?: "default" | "linear";
   animatePresence?: boolean;
+  onShow?: () => void;
+  onHide?: () => void;
+  onHidden?: () => void;
 }
 
 export interface ToastOptions extends Omit<OverlayShowOptions, "type"> {

@@ -5,7 +5,10 @@ import {
   useNavigationContainerRef,
 } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator, StackScreenProps } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  StackScreenProps,
+} from "@react-navigation/stack";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -25,7 +28,7 @@ import {
 } from "react-native";
 
 type OverviewStackParamList = {
-  Overview: undefined;
+  OverviewHome: undefined;
   Details: undefined;
 };
 
@@ -59,12 +62,9 @@ const getAnimationDuration = (animation: AnimationOption) => {
 
 type OverviewScreenProps = StackScreenProps<
   OverviewStackParamList,
-  "Overview"
+  "OverviewHome"
 >;
-type DetailsScreenProps = StackScreenProps<
-  OverviewStackParamList,
-  "Details"
->;
+type DetailsScreenProps = StackScreenProps<OverviewStackParamList, "Details">;
 
 type NavigationContainerRefLike = {
   addListener?: (
@@ -76,6 +76,7 @@ type NavigationContainerRefLike = {
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const Stack = createStackNavigator<OverviewStackParamList>();
+
 
 const OutlineButton = ({
   label,
@@ -129,6 +130,8 @@ const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
   };
 
   const showBottomModal = () => {
+    console.log("showing bottom modal");
+
     overlay.modal({
       dismissible: true,
       backdrop: "dim",
@@ -198,7 +201,8 @@ const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
         </Card>
         <Card title="Navigation scope">
           <Text style={styles.hint}>
-            Animation: {modalAnimation} ({getAnimationDuration(modalAnimation) ?? 180}ms).
+            Animation: {modalAnimation} (
+            {getAnimationDuration(modalAnimation) ?? 180}ms).
           </Text>
           <OutlineButton label="Show SCREEN modal" onPress={showScreenModal} />
           <OutlineButton
@@ -214,7 +218,8 @@ const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
 
         <Card title="Keyboard avoidance">
           <Text style={styles.hint}>
-            Animation: {modalAnimation} ({getAnimationDuration(modalAnimation) ?? 180}ms).
+            Animation: {modalAnimation} (
+            {getAnimationDuration(modalAnimation) ?? 180}ms).
           </Text>
           <OutlineButton
             label="Show keyboard modal"
@@ -455,17 +460,17 @@ const TooltipsScreen = () => {
           <View ref={customRef} collapsable={false}>
             <OutlineButton
               label="Show custom tooltip"
-                onPress={() =>
-                  overlay.tooltip({
-                    anchorRef: customRef as TooltipAnchorRef,
-                    placement: "bottom",
-                    animation: tooltipAnimation,
-                    animationDurationMs: tooltipDuration,
+              onPress={() =>
+                overlay.tooltip({
+                  anchorRef: customRef as TooltipAnchorRef,
+                  placement: "bottom",
+                  animation: tooltipAnimation,
+                  animationDurationMs: tooltipDuration,
                     render: (api) => (
                       <View style={styles.customTooltip}>
-                        <Text style={styles.customTooltipTitle}>
-                          Custom tooltip
-                        </Text>
+                      <Text style={styles.customTooltipTitle}>
+                        Custom tooltip
+                      </Text>
                       <Text style={styles.customTooltipText}>
                         Fully custom UI rendered by your app.
                       </Text>
@@ -484,7 +489,11 @@ const TooltipsScreen = () => {
 
 const OverviewStack = () => (
   <Stack.Navigator>
-    <Stack.Screen name="Overview" component={OverviewScreen} />
+    <Stack.Screen
+      name="OverviewHome"
+      component={OverviewScreen}
+      options={{ title: "Overview" }}
+    />
     <Stack.Screen name="Details" component={DetailsScreen} />
   </Stack.Navigator>
 );

@@ -50,6 +50,9 @@ export const createOverlayStore = (setItems: SetItems): OverlayStore => {
       animationDurationMs: options.animationDurationMs,
       animationEasing: options.animationEasing,
       animatePresence: options.animatePresence,
+      onShow: options.onShow,
+      onHide: options.onHide,
+      onHidden: options.onHidden,
       props: options.props as P,
       render: options.render,
       onBackPress: options.onBackPress

@@ -95,6 +95,13 @@ export type OverlayItem<P = unknown> = {
   /** Render the overlay UI. */
   render: (api: OverlayRenderApi, props: P) => React.ReactNode;
 
+  /** Called once when the overlay becomes visible. */
+  onShow?: () => void;
+  /** Called once when hide is requested. */
+  onHide?: () => void;
+  /** Called once after the overlay is fully removed. */
+  onHidden?: () => void;
+
   /**
    * Optional back handler hook for this overlay.
    * Return true if the back press was handled.
@@ -132,6 +139,9 @@ export type ToastOptions = {
   animationDurationMs?: number;
   animationEasing?: OverlayAnimationEasing;
   animatePresence?: boolean;
+  onShow?: () => void;
+  onHide?: () => void;
+  onHidden?: () => void;
 };
 
 /** Convenience tooltip options */
@@ -169,6 +179,9 @@ export type TooltipOptions = {
   animationDurationMs?: number;
   animationEasing?: OverlayAnimationEasing;
   animatePresence?: boolean;
+  onShow?: () => void;
+  onHide?: () => void;
+  onHidden?: () => void;
 };
 
 /** Convenience modal options */
@@ -189,6 +202,9 @@ export type ModalOptions = {
   animationDurationMs?: number;
   animationEasing?: OverlayAnimationEasing;
   animatePresence?: boolean;
+  onShow?: () => void;
+  onHide?: () => void;
+  onHidden?: () => void;
 };
 
 /** Convenience loader options */
@@ -207,6 +223,9 @@ export type LoaderOptions = {
   animationDurationMs?: number;
   animationEasing?: OverlayAnimationEasing;
   animatePresence?: boolean;
+  onShow?: () => void;
+  onHide?: () => void;
+  onHidden?: () => void;
 };
 
 /** Public overlay controller API */
