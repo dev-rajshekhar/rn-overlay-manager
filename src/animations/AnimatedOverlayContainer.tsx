@@ -20,11 +20,11 @@ const getHiddenValues = (animation: OverlayAnimation) => {
     case "fade":
       return { opacity: 0, scale: 1, translateY: 0 };
     case "scale":
-      return { opacity: 0, scale: 0.95, translateY: 0 };
+      return { opacity: 0, scale: 0.9, translateY: 0 };
     case "slide-up":
-      return { opacity: 0, scale: 1, translateY: 12 };
+      return { opacity: 0, scale: 1, translateY: 24 };
     case "slide-down":
-      return { opacity: 0, scale: 1, translateY: -12 };
+      return { opacity: 0, scale: 1, translateY: -24 };
     case "none":
     default:
       return { opacity: 1, scale: 1, translateY: 0 };
@@ -176,26 +176,27 @@ export const AnimatedOverlayContainer = ({
     if (!visible) {
       return null;
     }
-    if (baseOpacity !== 1 || baseScale !== 1) {
-      return (
-        <View style={[{ opacity: baseOpacity, transform: [{ scale: baseScale }] }, style]}>
-          {children}
-        </View>
-      );
-    }
-    return <>{children}</>;
+    const baseStyle =
+      baseOpacity !== 1 || baseScale !== 1
+        ? { opacity: baseOpacity, transform: [{ scale: baseScale }] }
+        : undefined;
+    return (
+      <View style={[style, baseStyle]}>
+        {children}
+      </View>
+    );
   }
 
   const containerStyle = {
     opacity: Animated.multiply(opacity, baseOpacity),
-    transform: [
-      { translateY },
-      { scale: Animated.multiply(scale, baseScale) }
-    ]
+    transform: [{ translateY }, { scale: Animated.multiply(scale, baseScale) }]
   };
 
   return (
-    <Animated.View style={[containerStyle, style]}>
+    <Animated.View
+      pointerEvents={visible ? "box-none" : "none"}
+      style={[containerStyle, style]}
+    >
       {children}
     </Animated.View>
   );
