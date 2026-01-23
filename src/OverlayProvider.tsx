@@ -50,6 +50,10 @@ const createHelperShowOptions = <P,>(
     placement: overrides?.placement,
     insets: overrides?.insets,
     avoidKeyboard: overrides?.avoidKeyboard,
+    animation: overrides?.animation,
+    animationDurationMs: overrides?.animationDurationMs,
+    animationEasing: overrides?.animationEasing,
+    animatePresence: overrides?.animatePresence,
     scope: overrides?.scope,
     props,
     onBackPress: overrides?.onBackPress,
@@ -104,6 +108,7 @@ export const OverlayProvider = ({
       warnIfNoHost();
       const placement = options.placement ?? "bottom";
       const durationMs = options.durationMs ?? 2000;
+      const animation = options.animation ?? "slide-up";
       activeToastIdRef.current = options.id;
       return store.show({
         id: options.id,
@@ -127,7 +132,11 @@ export const OverlayProvider = ({
         blockTouches: false,
         backdrop: "none",
         placement,
-        insets: "safeArea"
+        insets: "safeArea",
+        animation,
+        animationDurationMs: options.animationDurationMs,
+        animationEasing: options.animationEasing,
+        animatePresence: options.animatePresence
       });
     },
     [store]
@@ -178,6 +187,7 @@ export const OverlayProvider = ({
       const dismissible = options.dismissible ?? true;
       const placement = options.placement ?? "auto";
       const type = options.type ?? "info";
+      const animation = options.animation ?? "fade";
       const scope = options.scope ?? "global";
       if (scope === "screen" && !routeKey) {
         warnScreenScopeWithoutNavigation();
@@ -203,6 +213,10 @@ export const OverlayProvider = ({
         backdrop: "transparent",
         insets: "none",
         avoidKeyboard: options.avoidKeyboard,
+        animation,
+        animationDurationMs: options.animationDurationMs,
+        animationEasing: options.animationEasing,
+        animatePresence: options.animatePresence,
         scope: scope === "screen" && !routeKey ? "global" : scope,
         routeKey: scope === "screen" ? routeKey ?? undefined : undefined
       });
@@ -216,6 +230,7 @@ export const OverlayProvider = ({
       const dismissible = options.dismissible ?? true;
       const backdrop = options.backdrop ?? "dim";
       const insets = options.insets ?? "safeArea";
+      const animation = options.animation ?? "scale";
       const scope = options.scope ?? "global";
       if (scope === "screen" && !routeKey) {
         warnScreenScopeWithoutNavigation();
@@ -235,6 +250,10 @@ export const OverlayProvider = ({
         backdrop,
         insets,
         avoidKeyboard: options.avoidKeyboard,
+        animation,
+        animationDurationMs: options.animationDurationMs,
+        animationEasing: options.animationEasing,
+        animatePresence: options.animatePresence,
         scope: scope === "screen" && !routeKey ? "global" : scope,
         routeKey: scope === "screen" ? routeKey ?? undefined : undefined
       });
@@ -245,6 +264,7 @@ export const OverlayProvider = ({
   const loader = React.useCallback(
     (options?: LoaderOptions) => {
       warnIfNoHost();
+      const animation = options?.animation ?? "fade";
       return store.show({
         type: "loader",
         props: options,
@@ -258,7 +278,11 @@ export const OverlayProvider = ({
         dismissible: false,
         blockTouches: true,
         backdrop: "dim",
-        insets: "none"
+        insets: "none",
+        animation,
+        animationDurationMs: options?.animationDurationMs,
+        animationEasing: options?.animationEasing,
+        animatePresence: options?.animatePresence
       });
     },
     [store]

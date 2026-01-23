@@ -12,7 +12,7 @@
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.10.1",
     "@react-navigation/native": "^7.1.28",
-    "@react-navigation/stack": "^7.10.1",
+    "@react-navigation/stack": "^7.6.16",
     "expo": "~54.0.30",
     "react": "19.1.0",
     "react-dom": "19.1.0",

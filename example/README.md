@@ -42,6 +42,13 @@ npx expo start
 - Open the keyboard modal and ensure the input stays visible.
 - Tap the tooltip icon near the edge; it should clamp within the screen.
 
+## Animation demo
+
+- Overview tab uses `scale` for modals.
+- Toasts tab uses `slide-up` for all toasts.
+- Tooltips tab uses `fade` for all tooltips.
+- Verify enter/exit feel smooth and the keyboard modal still keeps the input visible.
+
 ## React Navigation integration (used here)
 
 ```tsx

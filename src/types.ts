@@ -17,6 +17,17 @@ export type InsetsMode =
   | "safeArea+tabBar"
   | { top?: number; bottom?: number; left?: number; right?: number };
 
+/** Basic enter/exit animation presets. */
+export type OverlayAnimation =
+  | "none"
+  | "fade"
+  | "scale"
+  | "slide-up"
+  | "slide-down";
+
+/** Minimal easing presets for overlay animations. */
+export type OverlayAnimationEasing = "default" | "linear";
+
 export type Insets = {
   top: number;
   bottom: number;
@@ -69,6 +80,15 @@ export type OverlayItem<P = unknown> = {
   /** Shift overlay upward when keyboard is visible (opt-in). */
   avoidKeyboard?: boolean;
 
+  /** Enter/exit animation preset (optional). */
+  animation?: OverlayAnimation;
+  /** Animation duration in ms (optional). */
+  animationDurationMs?: number;
+  /** Animation easing preset (optional). */
+  animationEasing?: OverlayAnimationEasing;
+  /** When false, overlay unmounts immediately on hide. */
+  animatePresence?: boolean;
+
   /** Arbitrary user props for render function. */
   props: P;
 
@@ -108,6 +128,10 @@ export type ToastOptions = {
   textStyle?: StyleProp<TextStyle>;
   backgroundColor?: string;
   scope?: "global" | "screen";
+  animation?: OverlayAnimation;
+  animationDurationMs?: number;
+  animationEasing?: OverlayAnimationEasing;
+  animatePresence?: boolean;
 };
 
 /** Convenience tooltip options */
@@ -141,6 +165,10 @@ export type TooltipOptions = {
   avoidKeyboard?: boolean;
   /** Scope for automatic cleanup when navigation changes. */
   scope?: "global" | "screen";
+  animation?: OverlayAnimation;
+  animationDurationMs?: number;
+  animationEasing?: OverlayAnimationEasing;
+  animatePresence?: boolean;
 };
 
 /** Convenience modal options */
@@ -157,6 +185,10 @@ export type ModalOptions = {
   render: (api: OverlayRenderApi) => React.ReactNode;
   /** Scope for automatic cleanup when navigation changes. */
   scope?: "global" | "screen";
+  animation?: OverlayAnimation;
+  animationDurationMs?: number;
+  animationEasing?: OverlayAnimationEasing;
+  animatePresence?: boolean;
 };
 
 /** Convenience loader options */
@@ -171,6 +203,10 @@ export type LoaderOptions = {
     text?: StyleProp<TextStyle>;
     spinner?: StyleProp<ViewStyle>;
   };
+  animation?: OverlayAnimation;
+  animationDurationMs?: number;
+  animationEasing?: OverlayAnimationEasing;
+  animatePresence?: boolean;
 };
 
 /** Public overlay controller API */

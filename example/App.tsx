@@ -5,10 +5,7 @@ import {
   useNavigationContainerRef,
 } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import {
-  createNativeStackNavigator,
-  NativeStackScreenProps,
-} from "@react-navigation/native-stack";
+import { createStackNavigator, StackScreenProps } from "@react-navigation/stack";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -38,11 +35,33 @@ type RootTabParamList = {
   Tooltips: undefined;
 };
 
-type OverviewScreenProps = NativeStackScreenProps<
+const animationOptions = [
+  "fade",
+  "scale",
+  "slide-up",
+  "slide-down",
+  "none",
+] as const;
+type AnimationOption = (typeof animationOptions)[number];
+
+const getAnimationDuration = (animation: AnimationOption) => {
+  if (animation === "none") {
+    return undefined;
+  }
+  if (animation === "slide-up" || animation === "slide-down") {
+    return 320;
+  }
+  if (animation === "scale") {
+    return 260;
+  }
+  return 220;
+};
+
+type OverviewScreenProps = StackScreenProps<
   OverviewStackParamList,
   "Overview"
 >;
-type DetailsScreenProps = NativeStackScreenProps<
+type DetailsScreenProps = StackScreenProps<
   OverviewStackParamList,
   "Details"
 >;
@@ -56,7 +75,7 @@ type NavigationContainerRefLike = {
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
-const Stack = createNativeStackNavigator<OverviewStackParamList>();
+const Stack = createStackNavigator<OverviewStackParamList>();
 
 const OutlineButton = ({
   label,
@@ -85,20 +104,16 @@ const Card = ({
 
 const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
   const overlay = useOverlay();
-
-  const showGlobalToast = () => {
-    overlay.toast({
-      message: "Global toast (should persist across tabs)",
-      placement: "bottom",
-      durationMs: 3000,
-    });
-  };
+  const [modalAnimation, setModalAnimation] =
+    React.useState<AnimationOption>("scale");
 
   const showScreenModal = () => {
     overlay.modal({
       scope: "screen",
       dismissible: true,
       backdrop: "dim",
+      animation: modalAnimation,
+      animationDurationMs: getAnimationDuration(modalAnimation),
       render: (api) => (
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
@@ -118,6 +133,8 @@ const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
       dismissible: true,
       backdrop: "dim",
       insets: "safeArea+tabBar",
+      animation: modalAnimation,
+      animationDurationMs: getAnimationDuration(modalAnimation),
       render: (api) => (
         <View style={styles.bottomModalContainer}>
           <View style={styles.bottomModalCard}>
@@ -132,16 +149,13 @@ const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
     });
   };
 
-  const showLoader = () => {
-    const id = overlay.loader({ message: "Loading..." });
-    setTimeout(() => overlay.hide(id), 1500);
-  };
-
   const showKeyboardModal = () => {
     overlay.modal({
       dismissible: true,
       backdrop: "dim",
       avoidKeyboard: true,
+      animation: modalAnimation,
+      animationDurationMs: getAnimationDuration(modalAnimation),
       render: (api) => (
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
@@ -158,9 +172,34 @@ const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
+        <Card title="Modal animation">
+          <Text style={styles.hint}>Applies to modal + bottom modal.</Text>
+          <View style={styles.segmented}>
+            {animationOptions.map((option) => (
+              <Pressable
+                key={option}
+                onPress={() => setModalAnimation(option)}
+                style={[
+                  styles.segment,
+                  modalAnimation === option && styles.segmentActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.segmentText,
+                    modalAnimation === option && styles.segmentTextActive,
+                  ]}
+                >
+                  {option}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Card>
         <Card title="Navigation scope">
-          <Text style={styles.hint}>Global toast + screen-scoped modal.</Text>
-          <OutlineButton label="Show GLOBAL toast" onPress={showGlobalToast} />
+          <Text style={styles.hint}>
+            Animation: {modalAnimation} ({getAnimationDuration(modalAnimation) ?? 180}ms).
+          </Text>
           <OutlineButton label="Show SCREEN modal" onPress={showScreenModal} />
           <OutlineButton
             label="Go to Details"
@@ -173,13 +212,10 @@ const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
           <OutlineButton label="Show bottom modal" onPress={showBottomModal} />
         </Card>
 
-        <Card title="Loader">
-          <Text style={styles.hint}>Blocking loader with auto-hide.</Text>
-          <OutlineButton label="Show loader (1.5s)" onPress={showLoader} />
-        </Card>
-
         <Card title="Keyboard avoidance">
-          <Text style={styles.hint}>Modal should shift above keyboard.</Text>
+          <Text style={styles.hint}>
+            Animation: {modalAnimation} ({getAnimationDuration(modalAnimation) ?? 180}ms).
+          </Text>
           <OutlineButton
             label="Show keyboard modal"
             onPress={showKeyboardModal}
@@ -193,6 +229,7 @@ const OverviewScreen = ({ navigation }: OverviewScreenProps) => {
 const DetailsScreen = (_props: DetailsScreenProps) => {
   const overlay = useOverlay();
   const helpRef = React.useRef<ViewType | null>(null);
+  const tooltipAnimation = "fade";
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -209,6 +246,7 @@ const DetailsScreen = (_props: DetailsScreenProps) => {
                   text: "Screen tooltip near the edge",
                   placement: "auto",
                   scope: "screen",
+                  animation: tooltipAnimation,
                 })
               }
               style={styles.helpButton}
@@ -224,16 +262,63 @@ const DetailsScreen = (_props: DetailsScreenProps) => {
 
 const ToastsScreen = () => {
   const overlay = useOverlay();
+  const [toastAnimation, setToastAnimation] =
+    React.useState<AnimationOption>("slide-up");
+  const toastDuration = getAnimationDuration(toastAnimation);
 
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
+        <Card title="Toast animation">
+          <Text style={styles.hint}>
+            Applies to all toast demos ({toastDuration ?? 180}ms).
+          </Text>
+          <View style={styles.segmented}>
+            {animationOptions.map((option) => (
+              <Pressable
+                key={option}
+                onPress={() => setToastAnimation(option)}
+                style={[
+                  styles.segment,
+                  toastAnimation === option && styles.segmentActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.segmentText,
+                    toastAnimation === option && styles.segmentTextActive,
+                  ]}
+                >
+                  {option}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <OutlineButton
+            label="Show global toast"
+            onPress={() =>
+              overlay.toast({
+                message: "Global toast (persists across tabs)",
+                placement: "bottom",
+                durationMs: 3000,
+                animation: toastAnimation,
+                animationDurationMs: toastDuration,
+              })
+            }
+          />
+        </Card>
+
         <Card title="Quick toast">
           <Text style={styles.hint}>Default style and bottom placement.</Text>
           <OutlineButton
             label="Show quick toast"
             onPress={() =>
-              overlay.toast({ message: "Quick toast", placement: "bottom" })
+              overlay.toast({
+                message: "Quick toast",
+                placement: "bottom",
+                animation: toastAnimation,
+                animationDurationMs: toastDuration,
+              })
             }
           />
         </Card>
@@ -249,6 +334,8 @@ const ToastsScreen = () => {
                 backgroundColor: "#0F172A",
                 textStyle: { color: "#F8FAFC", fontWeight: "700" },
                 toastStyle: { borderRadius: 14 },
+                animation: toastAnimation,
+                animationDurationMs: toastDuration,
               })
             }
           />
@@ -259,7 +346,12 @@ const ToastsScreen = () => {
           <OutlineButton
             label="Show top toast"
             onPress={() =>
-              overlay.toast({ message: "Top toast", placement: "top" })
+              overlay.toast({
+                message: "Top toast",
+                placement: "top",
+                animation: toastAnimation,
+                animationDurationMs: toastDuration,
+              })
             }
           />
         </Card>
@@ -269,9 +361,24 @@ const ToastsScreen = () => {
           <OutlineButton
             label="Queue 3 toasts"
             onPress={() => {
-              overlay.toast({ message: "Queued 1", placement: "bottom" });
-              overlay.toast({ message: "Queued 2", placement: "bottom" });
-              overlay.toast({ message: "Queued 3", placement: "bottom" });
+              overlay.toast({
+                message: "Queued 1",
+                placement: "bottom",
+                animation: toastAnimation,
+                animationDurationMs: toastDuration,
+              });
+              overlay.toast({
+                message: "Queued 2",
+                placement: "bottom",
+                animation: toastAnimation,
+                animationDurationMs: toastDuration,
+              });
+              overlay.toast({
+                message: "Queued 3",
+                placement: "bottom",
+                animation: toastAnimation,
+                animationDurationMs: toastDuration,
+              });
             }}
           />
         </Card>
@@ -284,10 +391,40 @@ const TooltipsScreen = () => {
   const overlay = useOverlay();
   const edgeRef = React.useRef<ViewType | null>(null);
   const customRef = React.useRef<ViewType | null>(null);
+  const [tooltipAnimation, setTooltipAnimation] =
+    React.useState<AnimationOption>("fade");
+  const tooltipDuration = getAnimationDuration(tooltipAnimation);
 
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
+        <Card title="Animation preset">
+          <Text style={styles.hint}>
+            Applies to all tooltips ({tooltipDuration ?? 180}ms).
+          </Text>
+          <View style={styles.segmented}>
+            {animationOptions.map((option) => (
+              <Pressable
+                key={option}
+                onPress={() => setTooltipAnimation(option)}
+                style={[
+                  styles.segment,
+                  tooltipAnimation === option && styles.segmentActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.segmentText,
+                    tooltipAnimation === option && styles.segmentTextActive,
+                  ]}
+                >
+                  {option}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Card>
+
         <Card title="Edge tooltip">
           <Text style={styles.hint}>
             Anchored near the edge to test clamping.
@@ -301,6 +438,8 @@ const TooltipsScreen = () => {
                     anchorRef: edgeRef as TooltipAnchorRef,
                     text: "Default tooltip near the edge",
                     placement: "auto",
+                    animation: tooltipAnimation,
+                    animationDurationMs: tooltipDuration,
                   })
                 }
                 style={styles.helpButton}
@@ -316,15 +455,17 @@ const TooltipsScreen = () => {
           <View ref={customRef} collapsable={false}>
             <OutlineButton
               label="Show custom tooltip"
-              onPress={() =>
-                overlay.tooltip({
-                  anchorRef: customRef as TooltipAnchorRef,
-                  placement: "bottom",
-                  render: (api) => (
-                    <View style={styles.customTooltip}>
-                      <Text style={styles.customTooltipTitle}>
-                        Custom tooltip
-                      </Text>
+                onPress={() =>
+                  overlay.tooltip({
+                    anchorRef: customRef as TooltipAnchorRef,
+                    placement: "bottom",
+                    animation: tooltipAnimation,
+                    animationDurationMs: tooltipDuration,
+                    render: (api) => (
+                      <View style={styles.customTooltip}>
+                        <Text style={styles.customTooltipTitle}>
+                          Custom tooltip
+                        </Text>
                       <Text style={styles.customTooltipText}>
                         Fully custom UI rendered by your app.
                       </Text>
@@ -411,6 +552,30 @@ const styles = StyleSheet.create({
   },
   cardBody: {
     gap: 10,
+  },
+  segmented: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 6,
+  },
+  segment: {
+    borderWidth: 1,
+    borderColor: "#CBD5F5",
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  segmentActive: {
+    backgroundColor: "#0F172A",
+    borderColor: "#0F172A",
+  },
+  segmentText: {
+    fontSize: 12,
+    color: "#0F172A",
+  },
+  segmentTextActive: {
+    color: "#F8FAFC",
   },
   hint: {
     fontSize: 13,
