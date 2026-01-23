@@ -171,6 +171,13 @@ overlay.hide(id);
 | `toastStyle`      | `ViewStyle`                   | —          | Built-in toast container style.      |
 | `textStyle`       | `TextStyle`                   | —          | Built-in toast text style.           |
 | `backgroundColor` | `string`                      | —          | Built-in toast background.           |
+| `animation`       | `"none" \| "fade" \| "scale" \| "slide-up" \| "slide-down"` | `"slide-up"` | Enter/exit animation preset. |
+| `animationDurationMs` | `number`                  | `180`      | Animation duration in ms.            |
+| `animationEasing` | `"default" \| "linear"`       | `"default"`| Animation easing preset.             |
+| `animatePresence` | `boolean`                     | `true`     | Keep mounted for exit animation.     |
+| `onShow`          | `() => void`                  | —          | Called when toast becomes visible.   |
+| `onHide`          | `() => void`                  | —          | Called when hide starts.             |
+| `onHidden`        | `() => void`                  | —          | Called after toast unmounts.         |
 
 ### modal(options)
 
@@ -181,6 +188,13 @@ overlay.hide(id);
 | `backdrop`      | `"transparent" \| "dim"`        | `"dim"`      | Backdrop appearance.                |
 | `insets`        | `"safeArea" \| "none" \| {...}` | `"safeArea"` | Container padding strategy.         |
 | `avoidKeyboard` | `boolean`                       | `false`      | Shift upward when keyboard appears. |
+| `animation`     | `"none" \| "fade" \| "scale" \| "slide-up" \| "slide-down"` | `"scale"` | Enter/exit animation preset. |
+| `animationDurationMs` | `number`                   | `180`        | Animation duration in ms.           |
+| `animationEasing` | `"default" \| "linear"`        | `"default"`  | Animation easing preset.            |
+| `animatePresence` | `boolean`                      | `true`       | Keep mounted for exit animation.    |
+| `onShow`        | `() => void`                    | —            | Called when modal becomes visible.  |
+| `onHide`        | `() => void`                    | —            | Called when hide starts.            |
+| `onHidden`      | `() => void`                    | —            | Called after modal unmounts.        |
 
 ### loader(options)
 
@@ -191,6 +205,13 @@ overlay.hide(id);
 | `styles.container` | `ViewStyle`          | —       | Container override.    |
 | `styles.text`      | `TextStyle`          | —       | Text override.         |
 | `styles.spinner`   | `ViewStyle`          | —       | Spinner wrap override. |
+| `animation`        | `"none" \| "fade" \| "scale" \| "slide-up" \| "slide-down"` | `"fade"` | Enter/exit animation preset. |
+| `animationDurationMs` | `number`          | `180`    | Animation duration in ms. |
+| `animationEasing`  | `"default" \| "linear"` | `"default"` | Animation easing preset. |
+| `animatePresence`  | `boolean`           | `true`   | Keep mounted for exit animation. |
+| `onShow`           | `() => void`        | —        | Called when loader becomes visible. |
+| `onHide`           | `() => void`        | —        | Called when hide starts. |
+| `onHidden`         | `() => void`        | —        | Called after loader unmounts. |
 
 ### tooltip(options)
 
@@ -206,6 +227,13 @@ overlay.hide(id);
 | `styles.text`      | `TextStyle`                                        | —        | Text override.                      |
 | `render`           | `(api, options) => ReactNode`                      | —        | Full custom renderer.               |
 | `avoidKeyboard`    | `boolean`                                          | `false`  | Shift upward when keyboard appears. |
+| `animation`        | `"none" \| "fade" \| "scale" \| "slide-up" \| "slide-down"` | `"fade"` | Enter/exit animation preset. |
+| `animationDurationMs` | `number`                                      | `180`     | Animation duration in ms.           |
+| `animationEasing`  | `"default" \| "linear"`                            | `"default"` | Animation easing preset.          |
+| `animatePresence`  | `boolean`                                          | `true`    | Keep mounted for exit animation.    |
+| `onShow`           | `() => void`                                       | —         | Called when tooltip becomes visible.|
+| `onHide`           | `() => void`                                       | —         | Called when hide starts.            |
+| `onHidden`         | `() => void`                                       | —         | Called after tooltip unmounts.      |
 
 ### show(options)
 
@@ -220,6 +248,13 @@ overlay.hide(id);
 | `priority`      | `number`                           | Higher value renders above lower.   |
 | `insets`        | `"safeArea" \| "none" \| {...}`    | Insets strategy.                    |
 | `avoidKeyboard` | `boolean`                          | Shift upward when keyboard appears. |
+| `animation`     | `"none" \| "fade" \| "scale" \| "slide-up" \| "slide-down"` | Enter/exit animation preset. |
+| `animationDurationMs` | `number`                    | Duration in ms.                     |
+| `animationEasing` | `"default" \| "linear"`          | Easing preset.                      |
+| `animatePresence` | `boolean`                        | Keep mounted for exit animation.    |
+| `onShow`        | `() => void`                      | Called when overlay becomes visible.|
+| `onHide`        | `() => void`                      | Called when hide starts.            |
+| `onHidden`      | `() => void`                      | Called after overlay unmounts.      |
 
 ### OverlayProvider props
 
@@ -246,6 +281,19 @@ Insets read from `react-native-safe-area-context` when available. If it is not i
 ## Keyboard avoidance
 
 `avoidKeyboard` provides a minimal upward shift when the keyboard is visible. It is not a full scroll-to-input solution.
+
+## Animations
+
+All overlays can opt in to enter/exit animations via `animation`, `animationDurationMs`, and `animationEasing`. Built-in defaults:
+
+- modal: `scale`
+- toast: `slide-up`
+- tooltip: `fade`
+- loader: `fade`
+
+## Lifecycle callbacks
+
+Use `onShow`, `onHide`, and `onHidden` on any overlay (including built-ins) to react to appearance and dismissal. `onHidden` fires after exit animation completes (or immediately if animations are disabled).
 
 ## License
 
