@@ -1,6 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+- Basic enter/exit animations for overlays (fade/scale/slide presets)
+- Presence-based exit animations (smooth hide/hideAll/hideGroup)
+- Subtle stacking polish for multiple overlays
+- Lifecycle callbacks: `onShow`, `onHide`, `onHidden`
+- Example app: animation showcase
+
 ## 0.4.0
+
 - React Navigation adapter (NavigationOverlayProvider / NavigationOverlayHost)
 - Overlay scope support: `global` vs `screen`
 - Screen-scoped overlays auto-clear on navigation change
@@ -8,6 +17,7 @@
 - Navigation-based example app demonstrating real flows
 
 ## 0.3.0
+
 - Tooltip robustness improvements (measurement, clamping, rotation handling)
 - Tooltip pointer triangle updates and alignment fixes
 - Keyboard avoidance support (`avoidKeyboard`)
@@ -15,6 +25,7 @@
 - Public API docs expanded (TSDoc comments)
 
 ## 0.2.0
+
 - Dev warnings for missing/multiple OverlayHost and invalid tooltip anchorRef
 - Overlay groups with `group` + `hideGroup(group)`
 - `safeArea+tabBar` support with `tabBarHeight`
@@ -24,6 +35,7 @@
 - Example app expanded demos
 
 ## 0.1.0
+
 - Initial release
 - OverlayProvider + OverlayHost
 - Overlay store with stacking + priority
