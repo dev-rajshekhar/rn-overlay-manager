@@ -122,6 +122,18 @@ export const OverlayHost = () => {
   const [presentItems, setPresentItems] = React.useState<
     Record<string, { item: OverlayItem; visible: boolean }>
   >({});
+  const lifecycleRef = React.useRef<
+    Record<
+      string,
+      {
+        item: OverlayItem;
+        shown: boolean;
+        hideCalled: boolean;
+        hiddenCalled: boolean;
+      }
+    >
+  >({});
+  const prevPresentIdsRef = React.useRef<Set<string>>(new Set());
 
   React.useEffect(() => {
     setPresentItems((prev) => {
@@ -155,6 +167,56 @@ export const OverlayHost = () => {
       return next;
     });
   }, [items]);
+
+  React.useEffect(() => {
+    const currentIds = new Set(Object.keys(presentItems));
+
+    Object.values(presentItems).forEach((entry) => {
+      const id = entry.item.id;
+      const lifecycle =
+        lifecycleRef.current[id] ??
+        ({
+          item: entry.item,
+          shown: false,
+          hideCalled: false,
+          hiddenCalled: false
+        } as const);
+
+      lifecycleRef.current[id] = {
+        ...lifecycle,
+        item: entry.item
+      };
+
+      if (entry.visible && !lifecycle.shown) {
+        entry.item.onShow?.();
+        lifecycleRef.current[id].shown = true;
+      }
+
+      if (!entry.visible && !lifecycle.hideCalled) {
+        entry.item.onHide?.();
+        lifecycleRef.current[id].hideCalled = true;
+      }
+    });
+
+    prevPresentIdsRef.current.forEach((id) => {
+      if (currentIds.has(id)) {
+        return;
+      }
+      const lifecycle = lifecycleRef.current[id];
+      if (!lifecycle || lifecycle.hiddenCalled) {
+        delete lifecycleRef.current[id];
+        return;
+      }
+      if (!lifecycle.hideCalled) {
+        lifecycle.item.onHide?.();
+      }
+      lifecycle.item.onHidden?.();
+      lifecycle.hiddenCalled = true;
+      delete lifecycleRef.current[id];
+    });
+
+    prevPresentIdsRef.current = currentIds;
+  }, [presentItems]);
 
   const activeOrderedItems = React.useMemo(() => sortByPriority(items), [items]);
   const orderedItems = React.useMemo(() => {
